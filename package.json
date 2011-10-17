@@ -1,0 +1,30 @@
+{
+  "name": "rolodex",
+  "description": "Node account management system using redis",
+  "version": "0.1.0",
+  "author": "Brock Whitten <brock@sintaxi.com>",
+  "keywords": ["redis", "account management", "users", "authentication"],
+  "main": "./rolodex.js",
+  "scripts": { 
+    "test": "./node_modules/.bin/nodeunit test"
+  },
+  "repository": { 
+    "type": "git",
+    "url": "https://github.com/sintaxi/node-rolodex.git"
+  },
+  "dependencies": {
+    "uuid": "0.0.2",
+    "validator": "0.2.8"
+  },
+  "devDependencies": { 
+    "redis": "0.6.7",
+    "nodeunit": "0.5.4"
+  },
+  "engines": { "node": "*" },
+  "licenses" : [
+    { 
+      "type" : "MIT",
+      "url" : "https://raw.github.com/sintaxi/node-rolodex/master/README.md"
+    }
+  ]
+}
