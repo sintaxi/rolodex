@@ -14,7 +14,9 @@ module.exports = testCase({
 
   "should not create account wihtout args": function(test) {
     rolodex.account.create({}, function(errors, account){
-      test.deepEqual(errors.sort(), ["Password must be present", "Email address must be present", "Username must be present"].sort())
+      test.deepEqual(errors.messages.sort(), ["Password must be present", "Email address must be present", "Username must be present"].sort())
+      test.deepEqual(errors.fields["password"], "must be present")
+      test.deepEqual(errors.fields["username"], "must be present")
       test.done()
     })
   },
@@ -40,7 +42,9 @@ module.exports = testCase({
       "password":"foobar"
     }
     rolodex.account.create(accountParams, function(errors, account){
-      test.deepEqual(errors, ["Username already in use", "Email address already in use"].sort())
+      test.deepEqual(errors.messages.sort(), ["Username already in use", "Email address already in use"].sort())
+      test.deepEqual(errors.fields["username"], "already in use")
+      test.deepEqual(errors.fields["email"], "already in use")
       test.done()
     })
   },
@@ -51,7 +55,7 @@ module.exports = testCase({
       "password":"foobar"
     }
     rolodex.account.create(accountParams, function(errors, account){
-      test.deepEqual(errors, ["Email address must be present"])
+      test.deepEqual(errors.messages, ["Email address must be present"])
       test.done()
     })
   },
@@ -63,7 +67,7 @@ module.exports = testCase({
       "password":"foobar"
     }
     rolodex.account.create(accountParams, function(errors, account){
-      test.deepEqual(errors, ["Email address must be valid"])
+      test.deepEqual(errors.messages, ["Email address must be valid"])
       test.done()
     })
   },
@@ -73,7 +77,7 @@ module.exports = testCase({
       "email": "brock@foobar.com"
     }
     rolodex.account.create(accountParams, function(errors, account){
-      test.deepEqual(errors.sort(), ["Password must be present", "Username must be present"].sort())
+      test.deepEqual(errors.messages.sort(), ["Password must be present", "Username must be present"].sort())
       test.done()
     })
   },

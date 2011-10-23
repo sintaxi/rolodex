@@ -34,7 +34,38 @@ then pass it as an argument to the `rolodex` lib.
 
 Now we have rolodex.account object that gives us account management functions.
 
-#### Account
+### Errors
+
+Anytime errors are accepted as the first argument of the callback it will return
+`null` if the request was successful and if there are validation errors it will
+look like the following...
+
+    {
+      fields: {
+        "password": "is required",
+        "username": "must be unique"
+      },
+      messages: [
+        "Password is required",
+        "Username must be unique"
+      ]
+    }
+
+### Account
+
+Account Object looks like the following...
+
+    { 
+      id: 1,
+      uuid: 'b902b494-3392-4499-958b-2698b8ae411e',
+      username: 'sintaxi',
+      email: 'brock@sintaxi.com',
+      hash: 'syJ2nuUfD6bc4852829dcfa5752f300e19161a156',
+      login_at: '2011-10-23T05:18:31.229Z',
+      login_count: 84,
+      updated_at: '2011-09-23T02:17:26.229Z',
+      created_at: '2011-09-23T02:17:26.228Z'
+    }
 
 ### account.create(props, callback)
 

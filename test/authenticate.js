@@ -20,9 +20,10 @@ module.exports = testCase({
     })
   },
 
-  "should get errors wih incorrect username and password": function(test) {
+  "should get errors wih incorrect password": function(test) {
     rolodex.account.authenticate("sintaxi", "foobaz", function(errors, account){
-      test.deepEqual(errors[0], "Incorrect username and password")
+      test.deepEqual(errors.messages[0], "Password is not correct")
+      test.deepEqual(errors.fields["password"], "is not correct")
       test.done()
     })
   },
