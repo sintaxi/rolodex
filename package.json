@@ -13,11 +13,11 @@
     "url": "https://github.com/sintaxi/node-rolodex.git"
   },
   "dependencies": {
+    "redis": "0.6.7",
     "uuid": "0.0.2",
     "validator": "0.2.8"
   },
   "devDependencies": { 
-    "redis": "0.6.7",
     "nodeunit": "0.5.4"
   },
   "engines": { "node": "*" },
