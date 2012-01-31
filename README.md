@@ -8,9 +8,9 @@ information...
 
     {
       "name": "yourapplication",
-      "verson": "0.0.1",
+      "verson": "0.1.0",
       "dependencies": {
-        "rolodex": "0.3.0"
+        "rolodex": "0.4.0"
       }
     }
 
