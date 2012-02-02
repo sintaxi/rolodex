@@ -1,91 +1,101 @@
-var testCase = require('nodeunit').testCase
+var should = require("should")
 
-var redis = require("redis")
-var client = redis.createClient()
-var rolodex = require("../rolodex")(client)
+describe("authenticate", function(){
+  var redis = require("redis")
+  var client = redis.createClient()
+  var rolodex = require("../rolodex")(client)
 
-var validAccountDetails = {
-  "username": "sintaxi",
-  "email": "brock@sintaxi.com",
-  "password":"foobar"
-}
+  var validAccountDetails = {
+    "username": "sintaxi",
+    "email": "brock@sintaxi.com",
+    "password":"foobar"
+  }
 
-module.exports = testCase({
-
-  "should not create account wihtout args": function(test) {
+  it("should not create account wihtout args", function(done) {
     rolodex.account.create({}, function(errors, account){
-      test.deepEqual(errors.messages.sort(), ["Password must be present", "Email address must be present", "Username must be present"].sort())
-      test.deepEqual(errors.fields["password"], "must be present")
-      test.deepEqual(errors.fields["username"], "must be present")
-      test.done()
+      errors.should.have.property("fields")
+      errors.should.have.property("messages")
+      errors.fields.should.have.property("email", "must be present")
+      errors.fields.should.have.property("username", "must be present")
+      errors.fields.should.have.property("password", "must be present")
+      errors.messages.should.include("Email address must be present")
+      errors.messages.should.include("Username must be present")
+      errors.messages.should.include("Password must be present")
+      done()
     })
-  },
+  })
 
-  "should create account": function(test) {
+  it("should create account", function(done) {
     var accountParams = {
       "username": "sintaxi",
       "email": "brock@sintaxi.com",
       "password":"foobar"
     }
     rolodex.account.create(accountParams, function(errors, account){
-      test.deepEqual(account["id"], 1)
-      test.deepEqual(account["email"],"brock@sintaxi.com")
-      test.deepEqual(account["username"],"sintaxi")
-      test.done()
+      account.should.have.property("id", 1)
+      account.should.have.property("email", "brock@sintaxi.com")
+      account.should.have.property("username", "sintaxi")
+      account.should.have.property("uuid")
+      account.should.have.property("hash")
+      account.should.have.property("login_at")
+      account.should.have.property("login_count", 0)
+      account.should.have.property("created_at")
+      account.should.have.property("updated_at")
+      done()
     })
-  },
+  })
 
-  "should not create account without unique username and email": function(test) {
+  it("should not create account without unique username and email", function(done) {
     var accountParams = {
       "username": "sintaxi",
       "email": "brock@sintaxi.com",
       "password":"foobar"
     }
     rolodex.account.create(accountParams, function(errors, account){
-      test.deepEqual(errors.messages.sort(), ["Username already in use", "Email address already in use"].sort())
-      test.deepEqual(errors.fields["username"], "already in use")
-      test.deepEqual(errors.fields["email"], "already in use")
-      test.done()
+      errors.messages.should.eql(["Username already in use", "Email address already in use"].sort())
+      errors.fields.should.have.property("username", "already in use")
+      errors.fields.should.have.property("email", "already in use")
+      done()
     })
-  },
+  })
 
-  "should not create account without email": function(test) {
+  it("should not create account without email", function(done) {
     var accountParams = {
       "username": "foobar",
       "password":"foobar"
     }
     rolodex.account.create(accountParams, function(errors, account){
-      test.deepEqual(errors.messages, ["Email address must be present"])
-      test.done()
+      errors.messages.should.include("Email address must be present")
+      done()
     })
-  },
+  })
 
-  "should not create account without valid email": function(test) {
+  it("should not create account without valid email", function(done) {
     var accountParams = {
       "username": "foobar",
       "email": "brockatsintaxi.com",
       "password":"foobar"
     }
     rolodex.account.create(accountParams, function(errors, account){
-      test.deepEqual(errors.messages, ["Email address must be valid"])
-      test.done()
+      errors.messages.should.include("Email address must be valid")
+      done()
     })
-  },
+  })
 
-  "should not create account without username": function(test) {
+  it("should not create account without username", function(done) {
     var accountParams = {
       "email": "brock@foobar.com"
     }
     rolodex.account.create(accountParams, function(errors, account){
-      test.deepEqual(errors.messages.sort(), ["Password must be present", "Username must be present"].sort())
-      test.done()
+      errors.messages.should.include("Password must be present")
+      done()
     })
-  },
+  })
 
-  "cleanup": function(test){
+  after(function(){
     client.flushall()
     client.quit()
-    test.done()
-  }
+  })
 
 })
+

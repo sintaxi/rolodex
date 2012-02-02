@@ -1,46 +1,55 @@
-var testCase = require('nodeunit').testCase
+var should = require("should")
 
-var redis = require("redis")
-var client = redis.createClient()
-var rolodex = require("../rolodex")(client)
-
-module.exports = testCase({
-
-  "should create account": function(test) {
-    var accountParams = {
+describe("authenticate", function(){
+  var redis = require("redis")
+  var client = redis.createClient()
+  var rolodex = require("../rolodex")(client)
+  
+  before(function(done){
+    rolodex.account.create({
       "username": "sintaxi",
       "email": "brock@sintaxi.com",
       "password":"foobar"
-    }
-    rolodex.account.create(accountParams, function(errors, account){
-      test.deepEqual(account["id"], 1)
-      test.deepEqual(account["email"],"brock@sintaxi.com")
-      test.deepEqual(account["username"],"sintaxi")
-      test.done()
+      }, function(errors, account){
+      done()
     })
-  },
+  })
 
-  "should get errors wih incorrect password": function(test) {
+  it("should get validation error with missing username", function(done) {
+    rolodex.account.authenticate("batman", "foobaz", function(errors, account){
+      errors.fields.should.have.property("username", "is not in the system")
+      errors.messages.should.eql(["Username is not in the system"])
+      done()
+    })
+  })
+
+  it("should get validation error wih incorrect password", function(done) {
     rolodex.account.authenticate("sintaxi", "foobaz", function(errors, account){
-      test.deepEqual(errors.messages[0], "Password is not correct")
-      test.deepEqual(errors.fields["password"], "is not correct")
-      test.done()
+      errors.fields.should.have.property("password", "is not correct")
+      errors.messages.should.eql(["Password is not correct"])
+      done()
     })
-  },
+  })
 
-  "should be authenticate using username and password": function(test) {
+  it("should return user object on successful authentication", function(done) {
     rolodex.account.authenticate("sintaxi", "foobar", function(errors, account){
-      test.deepEqual(account["id"], 1)
-      test.deepEqual(account["email"],"brock@sintaxi.com")
-      test.deepEqual(account["username"],"sintaxi")
-      test.done()
+      account.should.have.property("id", "1")
+      account.should.have.property("email", "brock@sintaxi.com")
+      account.should.have.property("username", "sintaxi")
+      account.should.have.property("uuid")
+      account.should.have.property("hash")
+      account.should.have.property("login_at")
+      account.should.have.property("login_count")
+      account.should.have.property("created_at")
+      account.should.have.property("updated_at")
+      done()
     })
-  },
-
-  "cleanup": function(test){
+  })
+  
+  after(function(){
     client.flushall()
     client.quit()
-    test.done()
-  }
-
+  })
+  
 })
+

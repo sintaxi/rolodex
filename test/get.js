@@ -1,67 +1,84 @@
-var testCase = require('nodeunit').testCase
+var should = require("should")
 
-var redis = require("redis")
-var client = redis.createClient()
-var rolodex = require("../rolodex")(client)
-
-module.exports = testCase({
-
-  "should create account": function(test) {
-    var accountParams = {
+describe("authenticate", function(){
+  var redis = require("redis")
+  var client = redis.createClient()
+  var rolodex = require("../rolodex")(client)
+  
+  before(function(done){
+    rolodex.account.create({
       "username": "sintaxi",
       "email": "brock@sintaxi.com",
       "password":"foobar"
-    }
-    rolodex.account.create(accountParams, function(errors, account){
-      global.uuid = account["uuid"] // global
-      test.deepEqual(account["id"], 1)
-      test.deepEqual(account["email"],"brock@sintaxi.com")
-      test.deepEqual(account["username"],"sintaxi")
-      test.done()
+      }, function(errors, account){
+      global.uuid = account.uuid
+      done()
     })
-  },
+  })
 
-  "should get by id": function(test) {
+  it("should get by id", function(done) {
     rolodex.account.getById(1, function(account){
-      test.deepEqual(account["id"], 1)
-      test.deepEqual(account["email"],"brock@sintaxi.com")
-      test.deepEqual(account["username"],"sintaxi")
-      test.done()
+      account.should.have.property("id", "1")
+      account.should.have.property("email", "brock@sintaxi.com")
+      account.should.have.property("username", "sintaxi")
+      account.should.have.property("uuid")
+      account.should.have.property("hash")
+      account.should.have.property("login_at")
+      account.should.have.property("login_count", "0")
+      account.should.have.property("created_at")
+      account.should.have.property("updated_at")
+      done()
     })
-  },
+  })
 
-  "should get by username": function(test) {
+  it("should get by username", function(done) {
     rolodex.account.getByUsername("sintaxi", function(account){
-      test.deepEqual(account["id"], 1)
-      test.deepEqual(account["email"],"brock@sintaxi.com")
-      test.deepEqual(account["username"],"sintaxi")
-      test.done()
+      account.should.have.property("id", "1")
+      account.should.have.property("email", "brock@sintaxi.com")
+      account.should.have.property("username", "sintaxi")
+      account.should.have.property("uuid")
+      account.should.have.property("hash")
+      account.should.have.property("login_at")
+      account.should.have.property("login_count", "0")
+      account.should.have.property("created_at")
+      account.should.have.property("updated_at")
+      done()
     })
-  },
+  })
 
-  "should get by email": function(test) {
+  it("should get by email", function(done) {
     rolodex.account.getByEmail("brock@sintaxi.com", function(account){
-      test.deepEqual(account["id"], 1)
-      test.deepEqual(account["email"],"brock@sintaxi.com")
-      test.deepEqual(account["username"],"sintaxi")
-      test.done()
+      account.should.have.property("id", "1")
+      account.should.have.property("email", "brock@sintaxi.com")
+      account.should.have.property("username", "sintaxi")
+      account.should.have.property("uuid")
+      account.should.have.property("hash")
+      account.should.have.property("login_at")
+      account.should.have.property("login_count", "0")
+      account.should.have.property("created_at")
+      account.should.have.property("updated_at")
+      done()
     })
-  },
+  })
 
-  "should get by uuid": function(test) {
+  it("should get by UUID", function(done) {
     rolodex.account.getByUUID(uuid, function(account){
-      test.deepEqual(account["id"], 1)
-      test.deepEqual(account["email"],"brock@sintaxi.com")
-      test.deepEqual(account["username"],"sintaxi")
-      test.deepEqual(account["uuid"], uuid)
-      test.done()
+      account.should.have.property("id", "1")
+      account.should.have.property("email", "brock@sintaxi.com")
+      account.should.have.property("username", "sintaxi")
+      account.should.have.property("uuid")
+      account.should.have.property("hash")
+      account.should.have.property("login_at")
+      account.should.have.property("login_count", "0")
+      account.should.have.property("created_at")
+      account.should.have.property("updated_at")
+      done()
     })
-  },
+  })
 
-  "cleanup": function(test){
+  after(function(){
     client.flushall()
     client.quit()
-    test.done()
-  }
+  })
 
 })

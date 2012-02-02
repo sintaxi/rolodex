@@ -18,7 +18,8 @@
     "validator": "0.2.8"
   },
   "devDependencies": { 
-    "nodeunit": "0.5.4"
+    "mocha": "0.10.2",
+    "should": "0.5.1"
   },
   "engines": { "node": "*" },
   "licenses" : [

@@ -1,57 +1,59 @@
-var testCase = require('nodeunit').testCase
+var should = require("should")
 
-var redis = require("redis")
-var client = redis.createClient()
-var rolodex = require("../rolodex")(client)
-
-var validAccountDetails = {
-  "username": "sintaxi",
-  "email": "brock@sintaxi.com",
-  "password":"foobar"
-}
-
-module.exports = testCase({
-
-  "should create account": function(test) {
-    var accountParams = {
+describe("update", function(){
+  var redis = require("redis")
+  var client = redis.createClient()
+  var rolodex = require("../rolodex")(client)
+  
+  before(function(done){
+    rolodex.account.create({
       "username": "sintaxi",
       "email": "brock@sintaxi.com",
       "password":"foobar"
-    }
-    rolodex.account.create(accountParams, function(errors, account){
-      test.deepEqual(account["id"], 1)
-      test.deepEqual(account["email"],"brock@sintaxi.com")
-      test.deepEqual(account["username"],"sintaxi")
-      test.done()
+      }, function(errors, account){
+      done()
     })
-  },
+  })
 
-  "should be able to change username": function(test) {
-    var accountParams = { "username": "brock" }
-    rolodex.account.update(1, accountParams, function(errors, account){
-      test.deepEqual(account["id"], 1)
-      test.deepEqual(account["email"],"brock@sintaxi.com")
-      test.deepEqual(account["username"],"brock")
-      test.done()
+  it("should be able to change username", function(done) {
+    rolodex.account.update(1, { "username": "brock" }, function(errors, account){
+      account.should.have.property("id", "1")
+      account.should.have.property("email", "brock@sintaxi.com")
+      account.should.have.property("username", "brock")
+      account.should.have.property("uuid")
+      account.should.have.property("hash")
+      account.should.have.property("login_at")
+      account.should.have.property("login_count", "0")
+      account.should.have.property("created_at")
+      account.should.have.property("updated_at")
+      done()
     })
-  },
+  })
 
-  "should free up unused username": function(test) {
+  it("should free up unused username", function(done) {
     var accountParams = {
       "username": "sintaxi",
-      "email": "brock@example.com",
+      "email": "sintaxi@example.com",
       "password":"foobar"
     }
     rolodex.account.create(accountParams, function(errors, account){
-      test.deepEqual(account["username"],"sintaxi")
-      test.done()
+      account.should.have.property("id", 2)
+      account.should.have.property("email", "sintaxi@example.com")
+      account.should.have.property("username", "sintaxi")
+      account.should.have.property("uuid")
+      account.should.have.property("hash")
+      account.should.have.property("login_at")
+      account.should.have.property("login_count", 0)
+      account.should.have.property("created_at")
+      account.should.have.property("updated_at")
+      done()
     })
-  },
+  })
 
-  "cleanup": function(test){
+  after(function(){
     client.flushall()
     client.quit()
-    test.done()
-  }
+  })
 
 })
+
