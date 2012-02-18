@@ -1,6 +1,6 @@
 var should = require("should")
 
-describe("authenticate", function(){
+describe("create", function(){
   var redis = require("redis")
   var client = redis.createClient()
   var rolodex = require("../rolodex")(client)
@@ -18,9 +18,9 @@ describe("authenticate", function(){
       errors.fields.should.have.property("email", "must be present")
       errors.fields.should.have.property("username", "must be present")
       errors.fields.should.have.property("password", "must be present")
-      errors.messages.should.include("Email address must be present")
-      errors.messages.should.include("Username must be present")
-      errors.messages.should.include("Password must be present")
+      errors.messages.should.include("email must be present")
+      errors.messages.should.include("username must be present")
+      errors.messages.should.include("password must be present")
       done()
     })
   })
@@ -52,7 +52,7 @@ describe("authenticate", function(){
       "password":"foobar"
     }
     rolodex.account.create(accountParams, function(errors, account){
-      errors.messages.should.eql(["Username already in use", "Email address already in use"].sort())
+      errors.messages.sort().should.eql(["username already in use", "email already in use"].sort())
       errors.fields.should.have.property("username", "already in use")
       errors.fields.should.have.property("email", "already in use")
       done()
@@ -65,7 +65,7 @@ describe("authenticate", function(){
       "password":"foobar"
     }
     rolodex.account.create(accountParams, function(errors, account){
-      errors.messages.should.include("Email address must be present")
+      errors.messages.should.include("email must be present")
       done()
     })
   })
@@ -77,7 +77,7 @@ describe("authenticate", function(){
       "password":"foobar"
     }
     rolodex.account.create(accountParams, function(errors, account){
-      errors.messages.should.include("Email address must be valid")
+      errors.messages.should.include("email must be valid")
       done()
     })
   })
@@ -87,7 +87,7 @@ describe("authenticate", function(){
       "email": "brock@foobar.com"
     }
     rolodex.account.create(accountParams, function(errors, account){
-      errors.messages.should.include("Password must be present")
+      errors.messages.should.include("password must be present")
       done()
     })
   })

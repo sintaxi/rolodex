@@ -17,13 +17,13 @@ describe("update", function(){
 
   it("should be able to change username", function(done) {
     rolodex.account.update(1, { "username": "brock" }, function(errors, account){
-      account.should.have.property("id", "1")
+      account.should.have.property("id", 1)
       account.should.have.property("email", "brock@sintaxi.com")
       account.should.have.property("username", "brock")
       account.should.have.property("uuid")
       account.should.have.property("hash")
       account.should.have.property("login_at")
-      account.should.have.property("login_count", "0")
+      account.should.have.property("login_count")
       account.should.have.property("created_at")
       account.should.have.property("updated_at")
       done()
@@ -43,7 +43,7 @@ describe("update", function(){
       account.should.have.property("uuid")
       account.should.have.property("hash")
       account.should.have.property("login_at")
-      account.should.have.property("login_count", 0)
+      account.should.have.property("login_count")
       account.should.have.property("created_at")
       account.should.have.property("updated_at")
       done()
