@@ -33,7 +33,7 @@ describe("authenticate", function(){
 
   it("should return user object on successful authentication", function(done) {
     rolodex.account.authenticate("sintaxi", "foobar", function(errors, account){
-      account.should.have.property("id", "1")
+      account.should.have.property("id", 1)
       account.should.have.property("email", "brock@sintaxi.com")
       account.should.have.property("username", "sintaxi")
       account.should.have.property("uuid")
