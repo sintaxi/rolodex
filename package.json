@@ -6,7 +6,7 @@
   "keywords": ["redis", "account management", "users", "authentication"],
   "main": "./rolodex.js",
   "scripts": { 
-    "test": "./node_modules/.bin/mocha --globals uuid test/*"
+    "test": "./node_modules/.bin/mocha --ignore-leaks test/*"
   },
   "repository": { 
     "type": "git",
