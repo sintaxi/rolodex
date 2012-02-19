@@ -41,6 +41,7 @@ describe("create", function(){
       account.should.have.property("login_count", 0)
       account.should.have.property("created_at")
       account.should.have.property("updated_at")
+      account.should.not.have.property("password")
       done()
     })
   })
