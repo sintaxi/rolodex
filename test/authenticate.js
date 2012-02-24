@@ -37,7 +37,6 @@ describe("authenticate", function(){
       account.should.have.property("email", "brock@sintaxi.com")
       account.should.have.property("username", "sintaxi")
       account.should.have.property("uuid")
-      account.should.have.property("hash")
       account.should.have.property("login_at")
       account.should.have.property("login_count")
       account.should.have.property("created_at")
