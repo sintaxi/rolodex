@@ -18,7 +18,7 @@ describe("authenticate", function(){
   it("should get validation error with missing username", function(done) {
     rolodex.account.authenticate("batman", "foobaz", function(errors, account){
       errors.fields.should.have.property("username", "is not in the system")
-      errors.messages.should.eql(["Username is not in the system"])
+      errors.messages.should.eql(["username is not in the system"])
       done()
     })
   })
@@ -26,7 +26,7 @@ describe("authenticate", function(){
   it("should get validation error wih incorrect password", function(done) {
     rolodex.account.authenticate("sintaxi", "foobaz", function(errors, account){
       errors.fields.should.have.property("password", "is not correct")
-      errors.messages.should.eql(["Password is not correct"])
+      errors.messages.should.eql(["password is not correct"])
       done()
     })
   })
