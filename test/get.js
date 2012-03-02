@@ -30,50 +30,46 @@ describe("get", function(){
     })
   })
 
-  // it("should get by username", function(done) {
-  //   rolodex.account.getByUsername("sintaxi", function(account){
-  //     account.should.have.property("id", "1")
-  //     account.should.have.property("email", "brock@sintaxi.com")
-  //     account.should.have.property("username", "sintaxi")
-  //     account.should.have.property("uuid")
-  //     account.should.have.property("hash")
-  //     account.should.have.property("login_at")
-  //     account.should.have.property("login_count", "0")
-  //     account.should.have.property("created_at")
-  //     account.should.have.property("updated_at")
-  //     done()
-  //   })
-  // })
-  // 
-  // it("should get by email", function(done) {
-  //   rolodex.account.getByEmail("brock@sintaxi.com", function(account){
-  //     account.should.have.property("id", "1")
-  //     account.should.have.property("email", "brock@sintaxi.com")
-  //     account.should.have.property("username", "sintaxi")
-  //     account.should.have.property("uuid")
-  //     account.should.have.property("hash")
-  //     account.should.have.property("login_at")
-  //     account.should.have.property("login_count", "0")
-  //     account.should.have.property("created_at")
-  //     account.should.have.property("updated_at")
-  //     done()
-  //   })
-  // })
-  // 
-  // it("should get by UUID", function(done) {
-  //   rolodex.account.getByUUID(uuid, function(account){
-  //     account.should.have.property("id", "1")
-  //     account.should.have.property("email", "brock@sintaxi.com")
-  //     account.should.have.property("username", "sintaxi")
-  //     account.should.have.property("uuid")
-  //     account.should.have.property("hash")
-  //     account.should.have.property("login_at")
-  //     account.should.have.property("login_count", "0")
-  //     account.should.have.property("created_at")
-  //     account.should.have.property("updated_at")
-  //     done()
-  //   })
-  // })
+  it("should get by username", function(done) {
+    rolodex.account.get({ username: "sintaxi" }, function(account){
+      account.should.have.property("id", 1)
+      account.should.have.property("email", "brock@sintaxi.com")
+      account.should.have.property("username", "sintaxi")
+      account.should.have.property("uuid")
+      account.should.have.property("login_at")
+      account.should.have.property("login_count", 0)
+      account.should.have.property("created_at")
+      account.should.have.property("updated_at")
+      done()
+    })
+  })
+  
+  it("should get by email", function(done) {
+    rolodex.account.get({ email: "brock@sintaxi.com" }, function(account){
+      account.should.have.property("id", 1)
+      account.should.have.property("email", "brock@sintaxi.com")
+      account.should.have.property("username", "sintaxi")
+      account.should.have.property("uuid")
+      account.should.have.property("login_at")
+      account.should.have.property("login_count", 0)
+      account.should.have.property("created_at")
+      account.should.have.property("updated_at")
+      done()
+    })
+  })
+  
+  it("should get by UUID", function(done) {
+    rolodex.account.get({ uuid: uuid }, function(account){
+      account.should.have.property("id", 1)
+      account.should.have.property("email", "brock@sintaxi.com")
+      account.should.have.property("username", "sintaxi")
+      account.should.have.property("login_at")
+      account.should.have.property("login_count", 0)
+      account.should.have.property("created_at")
+      account.should.have.property("updated_at")
+      done()
+    })
+  })
 
   after(function(){
     client.flushall()
