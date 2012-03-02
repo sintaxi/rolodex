@@ -1,7 +1,7 @@
-var Model       = require("./model")
-var filters     = require("./filters")
-var validations = require("./validations")
-var auth        = require("./password")
+var Model       = require("../lib/model")
+var filters     = require("../lib/filters")
+var validations = require("../lib/validations")
+var auth        = require("../lib/password")
 
 module.exports = function(client) {
 
