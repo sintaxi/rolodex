@@ -1,7 +1,7 @@
 {
   "name": "rolodex",
   "description": "Node account management system using redis",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "author": "Brock Whitten <brock@sintaxi.com>",
   "keywords": ["redis", "account management", "users", "authentication"],
   "main": "./rolodex.js",
