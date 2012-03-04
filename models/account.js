@@ -1,7 +1,7 @@
 var Model       = require("../lib/model")
 var filters     = require("../lib/filters")
 var validations = require("../lib/validations")
-var auth        = require("../lib/hash")
+var hash        = require("../lib/hash")
 
 module.exports = function(client) {
 
@@ -97,7 +97,7 @@ module.exports = function(client) {
     client.get(namespace + ":username:" + username, function(err, id){
       if(id){
         that.read(id, function(obj){
-          if(auth.validate(obj.hash, password)){
+          if(hash.validate(obj.hash, password)){
             client.multi()
             .hincrby(namespace +":" + id, "login_count", 1)
             .hset(namespace + ":" + id, "login_at", (new Date()).toJSON())
