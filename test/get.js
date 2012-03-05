@@ -71,6 +71,13 @@ describe("get", function(){
     })
   })
 
+  it("should return null if not present", function(done) {
+    rolodex.account.get(99, function(account){
+      should.not.exist(account)
+      done()
+    })
+  })
+
   after(function(){
     client.flushall()
     client.quit()

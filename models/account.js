@@ -7,7 +7,7 @@ module.exports = function(client) {
 
   var account = new Model({
     "locals": {
-      "namespace": "account",  
+      "namespace": "account",
       "client": client
     },
     "filters": {
@@ -40,17 +40,20 @@ module.exports = function(client) {
   // - takes an `id`
   // - must fire callback with the record or `null`
   account.constructor.prototype.read = function(q, cb){
+ 
+    // once done
+    var callback = function(err, obj){
+      for(var key in obj) break;
+      key ? cb(obj) : cb(null)
+    }
+
     if(typeof q == 'object'){
       for(var key in q) break;
       client.get(namespace + ":" + key + ":" + q[key], function(err, id){
-        client.hgetall(namespace + ":" + id, function(err, obj){
-          cb(obj)
-        })
+        client.hgetall(namespace + ":" + id, callback)
       })
     }else{
-      client.hgetall(namespace + ":" + q, function(err, obj){
-        cb(obj)
-      })
+      client.hgetall(namespace + ":" + q, callback)
     }
   }
   
@@ -92,28 +95,26 @@ module.exports = function(client) {
     }
   }
   
-  account.constructor.prototype.authenticate = function(username, password, cb){
+  account.constructor.prototype.authenticate = function(q, password, cb){
     var that = this
-    client.get(namespace + ":username:" + username, function(err, id){
-      if(id){
-        that.read(id, function(obj){
-          if(hash.validate(obj.hash, password)){
-            client.multi()
-            .hincrby(namespace +":" + id, "login_count", 1)
-            .hset(namespace + ":" + id, "login_at", (new Date()).toJSON())
-            .exec(function(err, replies){
-              that.get(id, function(record){
-                cb(null, record)
-              })
+    that.read(q, function(obj){
+      if(obj){
+        if(hash.validate(obj.hash, password)){
+          client.multi()
+          .hincrby(namespace +":" + obj.id, "login_count", 1)
+          .hset(namespace + ":" + obj.id, "login_at", (new Date()).toJSON())
+          .exec(function(err, replies){
+            that.get(obj.id, function(record){
+              cb(null, record)
             })
-          }else{
-            var errors = {
-              fields: {"password": "is not correct"},
-              messages: ["password is not correct"]
-            }
-            cb(errors, null)
+          })
+        }else{
+          var errors = {
+            fields: {"password": "is not correct"},
+            messages: ["password is not correct"]
           }
-        })
+          cb(errors, null)
+        }
       }else{
         var errors = {
           fields: {"username": "is not in the system"},
@@ -121,7 +122,9 @@ module.exports = function(client) {
         }
         cb(errors, null)
       }
-    }) 
+    })
+
+
   }
   
   return account
