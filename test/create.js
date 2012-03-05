@@ -6,7 +6,6 @@ describe("create", function(){
   var rolodex = require("../rolodex")(client)
 
   var validAccountDetails = {
-    "username": "sintaxi",
     "email": "brock@sintaxi.com",
     "password":"foobar"
   }
@@ -16,10 +15,8 @@ describe("create", function(){
       errors.should.have.property("fields")
       errors.should.have.property("messages")
       errors.fields.should.have.property("email", "must be present")
-      errors.fields.should.have.property("username", "must be present")
       errors.fields.should.have.property("password", "must be present")
       errors.messages.should.include("email must be present")
-      errors.messages.should.include("username must be present")
       errors.messages.should.include("password must be present")
       done()
     })
@@ -27,14 +24,12 @@ describe("create", function(){
 
   it("should create account", function(done) {
     var accountParams = {
-      "username": "sintaxi",
       "email": "brock@sintaxi.com",
       "password":"foobar"
     }
     rolodex.account.create(accountParams, function(errors, account){
       account.should.have.property("id", 1)
       account.should.have.property("email", "brock@sintaxi.com")
-      account.should.have.property("username", "sintaxi")
       account.should.have.property("uuid")
       account.should.have.property("login_at")
       account.should.have.property("login_count", 0)
@@ -45,15 +40,13 @@ describe("create", function(){
     })
   })
 
-  it("should not create account without unique username and email", function(done) {
+  it("should not create account without unique email", function(done) {
     var accountParams = {
-      "username": "sintaxi",
       "email": "brock@sintaxi.com",
       "password":"foobar"
     }
     rolodex.account.create(accountParams, function(errors, account){
-      errors.messages.sort().should.eql(["username already in use", "email already in use"].sort())
-      errors.fields.should.have.property("username", "already in use")
+      errors.messages.sort().should.eql(["email already in use"].sort())
       errors.fields.should.have.property("email", "already in use")
       done()
     })
@@ -61,7 +54,6 @@ describe("create", function(){
 
   it("should not create account without email", function(done) {
     var accountParams = {
-      "username": "foobar",
       "password":"foobar"
     }
     rolodex.account.create(accountParams, function(errors, account){
@@ -72,7 +64,6 @@ describe("create", function(){
 
   it("should not create account without valid email", function(done) {
     var accountParams = {
-      "username": "foobar",
       "email": "brockatsintaxi.com",
       "password":"foobar"
     }
@@ -82,7 +73,7 @@ describe("create", function(){
     })
   })
 
-  it("should not create account without username", function(done) {
+  it("should not create account without password", function(done) {
     var accountParams = {
       "email": "brock@foobar.com"
     }

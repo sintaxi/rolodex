@@ -31,7 +31,6 @@ module.exports = function(client) {
     },
     "validations": {
       "email"   : [validations.present, validations.email, validations.unique],
-      "username": [validations.present, validations.unique],
       "password": [validations.presentOnCreate]
     }
   })
@@ -68,11 +67,9 @@ module.exports = function(client) {
       client.hgetall(key, function(err, old){
         client.multi()
         .del(namespace + ":email:" + old.email)
-        .del(namespace + ":username:" + old.username)
         .del(namespace + ":uuid:" + old.uuid)
         .hmset(key, obj)
         .set(namespace + ":email:" + obj.email, obj.id)
-        .set(namespace + ":username:" + obj.username, obj.id)
         .set(namespace + ":uuid:" + obj.uuid, obj.id)
         .exec(function(err, replies){
           if(!err) cb(null, obj)
@@ -87,7 +84,6 @@ module.exports = function(client) {
         .hmset(key, obj)
         .set(namespace + ":uuid:" + obj.uuid, obj.id)
         .set(namespace + ":email:" + obj.email, obj.id)
-        .set(namespace + ":username:" + obj.username, obj.id)
         .exec(function(err, replies){
           if(!err) cb(null, obj)
         })

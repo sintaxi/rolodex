@@ -7,7 +7,6 @@ describe("security", function(){
   
   before(function(done){
     rolodex.account.create({
-      "username": "sintaxi",
       "email": "brock@sintaxi.com",
       "password":"foobar"
       }, function(errors, account){
