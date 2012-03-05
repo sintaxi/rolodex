@@ -15,8 +15,8 @@ describe("security", function(){
   })
 
   it("should not be able to change uuid", function(done) {
-    rolodex.account.update(1, { "uuid": "12345" }, function(errors, account){
-      account.should.have.property("id", 1)
+    rolodex.account.update({ email: "brock@sintaxi.com"}, { "uuid": "12345" }, function(errors, account){
+      account.should.have.property("id")
       account.should.have.property("uuid")
       account.uuid.should.not.eql("12345")
       done()

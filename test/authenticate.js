@@ -31,8 +31,8 @@ describe("authenticate", function(){
   })
 
   it("should return user object on successful authentication", function(done) {
-    rolodex.account.authenticate(1, "foobar", function(errors, account){
-      account.should.have.property("id", 1)
+    rolodex.account.authenticate({ email: "brock@sintaxi.com" }, "foobar", function(errors, account){
+      account.should.have.property("id")
       account.should.have.property("email", "brock@sintaxi.com")
       account.should.have.property("uuid")
       account.should.have.property("login_at")
@@ -43,19 +43,6 @@ describe("authenticate", function(){
     })
   })
 
-  it("should return user object on successful authentication with email", function(done) {
-    rolodex.account.authenticate({ email:"brock@sintaxi.com" }, "foobar", function(errors, account){
-      account.should.have.property("id", 1)
-      account.should.have.property("email", "brock@sintaxi.com")
-      account.should.have.property("uuid")
-      account.should.have.property("login_at")
-      account.should.have.property("login_count")
-      account.should.have.property("created_at")
-      account.should.have.property("updated_at")
-      done()
-    })
-  })
-  
   after(function(){
     client.flushall()
     client.quit()

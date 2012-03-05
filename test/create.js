@@ -28,7 +28,7 @@ describe("create", function(){
       "password":"foobar"
     }
     rolodex.account.create(accountParams, function(errors, account){
-      account.should.have.property("id", 1)
+      account.should.have.property("id")
       account.should.have.property("email", "brock@sintaxi.com")
       account.should.have.property("uuid")
       account.should.have.property("login_at")

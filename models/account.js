@@ -77,16 +77,14 @@ module.exports = function(client) {
       })
     }else{
       // new
-      client.incr(namespace + ":nextId", function(err, id){
-        obj.id = id
-        var key = namespace + ":" + id;
-        client.multi()
-        .hmset(key, obj)
-        .set(namespace + ":uuid:" + obj.uuid, obj.id)
-        .set(namespace + ":email:" + obj.email, obj.id)
-        .exec(function(err, replies){
-          if(!err) cb(null, obj)
-        })
+      obj.id = new Date().getTime()
+      var key = namespace + ":" + obj.id;
+      client.multi()
+      .hmset(key, obj)
+      .set(namespace + ":uuid:" + obj.uuid, obj.id)
+      .set(namespace + ":email:" + obj.email, obj.id)
+      .exec(function(err, replies){
+        if(!err) cb(null, obj)
       })
     }
   }

@@ -10,13 +10,14 @@ describe("update", function(){
       "email": "brock@sintaxi.com",
       "password":"foobar"
       }, function(errors, account){
+      global.account_id = account.id
       done()
     })
   })
 
   it("should be able to change email", function(done) {
-    rolodex.account.update(1, { "email": "fred@sintaxi.com" }, function(errors, account){
-      account.should.have.property("id", 1)
+    rolodex.account.update(account_id , { "email": "fred@sintaxi.com" }, function(errors, account){
+      account.should.have.property("id", account_id)
       account.should.have.property("email", "fred@sintaxi.com")
       account.should.have.property("uuid")
       account.should.have.property("login_at")
@@ -33,7 +34,7 @@ describe("update", function(){
       "password":"foobar"
     }
     rolodex.account.create(accountParams, function(errors, account){
-      account.should.have.property("id", 2)
+      account.should.have.property("id")
       account.should.have.property("email", "brock@sintaxi.com")
       account.should.have.property("uuid")
       account.should.have.property("login_at")
