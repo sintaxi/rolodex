@@ -16,7 +16,7 @@ describe("update", function(){
   })
 
   it("should be able to change email", function(done) {
-    rolodex.account.update(account_id , { "email": "fred@sintaxi.com" }, function(errors, account){
+    rolodex.account.update({ email: "brock@sintaxi.com" } , { "email": "fred@sintaxi.com" }, function(errors, account){
       account.should.have.property("id", account_id)
       account.should.have.property("email", "fred@sintaxi.com")
       account.should.have.property("uuid")
