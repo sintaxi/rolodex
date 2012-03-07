@@ -1,3 +1,5 @@
+var base32      = require("base32")
+
 var Model       = require("../lib/model")
 var filters     = require("../lib/filters")
 var validations = require("../lib/validations")
@@ -19,7 +21,6 @@ module.exports = function(client) {
         filters.hash, 
         filters.login_at, 
         filters.login_count, 
-        filters.created_at, 
         filters.updated_at
       ],
       "after": [
@@ -77,16 +78,52 @@ module.exports = function(client) {
       })
     }else{
       // new
-      obj.id = new Date().getTime()
+      var date = new Date()
+      var timestamp = date.getTime()
+
+      // lets set a human readable id for new accounts
+      // these should remain 9 bits until around year 2056
+      // not perfect but better than auto-inc or uuid IMHO
+      obj.id = timestamp
+        .toString(36)
+        .split("")
+        .reverse()
+        .join("")
+        .match(RegExp('.{1,4}', 'g'))
+        .reverse()
+        .join("-")
+
+      // use same timestamp for created_at
+      obj.created_at = date.toJSON()
+
       var key = namespace + ":" + obj.id;
       client.multi()
       .hmset(key, obj)
       .set(namespace + ":uuid:" + obj.uuid, obj.id)
       .set(namespace + ":email:" + obj.email, obj.id)
+      .zadd(namespace + ":collection", timestamp, obj.id)
       .exec(function(err, replies){
         if(!err) cb(null, obj)
       })
     }
+  }
+
+  account.constructor.prototype.all = function(start, stop, cb){
+    var that = this
+    client.zrevrange(namespace + ":collection", start, stop, function(err, reply){
+      var accounts = []
+      var total = reply.length
+      var count = 0
+      reply.forEach(function(id){
+        that.get(id, function(account){
+          count++ 
+          accounts.push(account)
+          if(count == total){
+            cb(accounts) 
+          }
+        })
+      }) 
+    })
   }
   
   account.constructor.prototype.authenticate = function(q, password, cb){
