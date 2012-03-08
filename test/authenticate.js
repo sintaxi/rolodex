@@ -16,15 +16,15 @@ describe("authenticate", function(){
 
   it("should get validation error with missing email", function(done) {
     rolodex.account.authenticate({ email: "batman" }, "foobaz", function(errors, account){
-      errors.fields.should.have.property("username", "is not in the system")
-      errors.messages.should.eql(["username is not in the system"])
+      errors.details.should.have.property("account", "is not in the system")
+      errors.messages.should.eql(["account is not in the system"])
       done()
     })
   })
 
   it("should get validation error wih incorrect password", function(done) {
     rolodex.account.authenticate({ email: "brock@sintaxi.com" }, "foobaz", function(errors, account){
-      errors.fields.should.have.property("password", "is not correct")
+      errors.details.should.have.property("password", "is not correct")
       errors.messages.should.eql(["password is not correct"])
       done()
     })

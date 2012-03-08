@@ -12,10 +12,10 @@ describe("create", function(){
 
   it("should not create account wihtout args", function(done) {
     rolodex.account.create({}, function(errors, account){
-      errors.should.have.property("fields")
+      errors.should.have.property("details")
       errors.should.have.property("messages")
-      errors.fields.should.have.property("email", "must be present")
-      errors.fields.should.have.property("password", "must be present")
+      errors.details.should.have.property("email", "must be present")
+      errors.details.should.have.property("password", "must be present")
       errors.messages.should.include("email must be present")
       errors.messages.should.include("password must be present")
       done()
@@ -47,7 +47,7 @@ describe("create", function(){
     }
     rolodex.account.create(accountParams, function(errors, account){
       errors.messages.sort().should.eql(["email already in use"].sort())
-      errors.fields.should.have.property("email", "already in use")
+      errors.details.should.have.property("email", "already in use")
       done()
     })
   })

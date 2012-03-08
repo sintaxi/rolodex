@@ -150,15 +150,15 @@ module.exports = function(client) {
           })
         }else{
           var errors = {
-            fields: {"password": "is not correct"},
+            details: {"password": "is not correct"},
             messages: ["password is not correct"]
           }
           cb(errors, null)
         }
       }else{
         var errors = {
-          fields: {"username": "is not in the system"},
-          messages: ["username is not in the system"]
+          details: {"account": "is not in the system"},
+          messages: ["account is not in the system"]
         }
         cb(errors, null)
       }
