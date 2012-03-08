@@ -81,17 +81,22 @@ module.exports = function(client) {
       var date = new Date()
       var timestamp = date.getTime()
 
+      var chars = "0123456789abcdefghiklmnopqrstuvwxyz".split("")
+      var code  = "xxxx".replace(/[x]/g, function(c){ 
+        return chars[Math.floor(Math.random() * chars.length)]
+      })
       // lets set a human readable id for new accounts
       // these should remain 9 bits until around year 2056
       // not perfect but better than auto-inc or uuid IMHO
-      obj.id = timestamp
+      var aid = timestamp
         .toString(36)
         .split("")
         .reverse()
         .join("")
         .match(RegExp('.{1,4}', 'g'))
         .reverse()
-        .join("-")
+      aid.push(code)
+      obj.id = aid.join("-")
 
       // use same timestamp for created_at
       obj.created_at = date.toJSON()
@@ -111,18 +116,22 @@ module.exports = function(client) {
   account.constructor.prototype.all = function(start, stop, cb){
     var that = this
     client.zrevrange(namespace + ":collection", start, stop, function(err, reply){
-      var accounts = []
       var total = reply.length
       var count = 0
+      var transaction = client.multi()
       reply.forEach(function(id){
-        that.get(id, function(account){
-          count++ 
-          accounts.push(account)
-          if(count == total){
-            cb(accounts) 
-          }
+        transaction.hgetall(namespace + ":" + id)
+      })
+      transaction.exec(function(err, replies){
+        replies.forEach(function(obj){
+          that.out(obj, function(record){
+            count++
+            if(count == total){
+              cb(replies)
+            } 
+          })
         })
-      }) 
+      })
     })
   }
   
