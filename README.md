@@ -41,14 +41,14 @@ Anytime errors are accepted as the first argument of the callback it will return
 look like the following...
 
     {
-      fields: {
-        "password": "is required",
-        "username": "must be unique"
-      },
       messages: [
         "Password is required",
         "Username must be unique"
-      ]
+      ],
+      details: {
+        "password": "is required",
+        "username": "must be unique"
+      }
     }
 
 ### Account
@@ -56,11 +56,9 @@ look like the following...
 Account Object looks like the following...
 
     { 
-      id: 1,
+      id: 'ojzg-su2w-kqsn',
       uuid: 'b902b494-3392-4499-958b-2698b8ae411e',
-      username: 'sintaxi',
       email: 'brock@sintaxi.com',
-      hash: 'syJ2nuUfD6bc4852829dcfa5752f300e19161a156',
       login_at: '2011-10-23T05:18:31.229Z',
       login_count: 84,
       updated_at: '2011-09-23T02:17:26.229Z',
@@ -72,7 +70,6 @@ Account Object looks like the following...
     rolodex.account.create(
       {
         "email": "brock@sintaxi.com",
-        "username": "sintaxi",
         "password": "something"
       },
       function(errors, account){
@@ -82,7 +79,7 @@ Account Object looks like the following...
 
 ### account.update(id, props, callback)
 
-    rolodex.account.update(1, { "username": "sintaxi" },
+    rolodex.account.update("ojzg-su2w-kqsn", { "email": "fred@sintaxi" },
       function(errors, account){
         console.log(account)
       }
@@ -90,46 +87,12 @@ Account Object looks like the following...
 
 ### account.authenticate(username, password, callback)
 
-    rolodex.account.authenticate("sintaxi", "something",
+    rolodex.account.authenticate({ email: "brock@sintaxi" }, "something",
       function(errors, account){
         console.log(account)
       }
     )
 
-### account.getById(id, callback)
-
-    rolodex.account.getById(12,
-      function(account){
-        console.log(account)
-      }
-    )
-
-### account.getByUsername(username, callback)
-
-    rolodex.account.getById(
-      "sintaxi",
-      function(account){
-        console.log(account)
-      }
-    )
-
-### account.getByUUID(uuid, callback)
-
-    rolodex.account.getByUUID(
-      "550e8400-e29b-41d4-a716-446655440000", 
-      function(account){
-        console.log(account)
-      }
-    )
-
-### account.getByEmail(email, callback)
-
-    rolodex.account.getByEmail(
-      "brock@sintaxi.com", 
-      function(account){
-        console.log(account)
-      }
-    )
 
 ## License
 
