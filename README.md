@@ -10,7 +10,7 @@ information...
       "name": "yourapplication",
       "version": "0.1.0",
       "dependencies": {
-        "rolodex": "0.5.7"
+        "rolodex": "0.5.8"
       }
     }
 
