@@ -9,9 +9,11 @@ describe("all", function(){
   before(function(done){
     var count = 0
     for(var i = 1; i <= total; i++)(function(i){
+      var role = Math.floor(Math.random()*6)
       rolodex.account.create({
         "email": "user"+ i +"@sintaxi.com",
-        "password":"foobar"
+        "password":"foobar",
+        "role": role,
         }, function(errors, account){
         count++
         if(count == total){
@@ -22,12 +24,9 @@ describe("all", function(){
 
   })
 
-  it("should get all accounts", function(done) {
-    start_time = new Date().getTime();
-    rolodex.account.all(0, -1, function(accounts){
-      end_time = new Date().getTime();
+  it("should get all group 5 accounts", function(done) {
+    rolodex.account.group(5, function(accounts){
       accounts.should.be.an.instanceof(Array)
-      accounts.length.should.eql(total)
       done()
     })
   })

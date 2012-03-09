@@ -19,6 +19,7 @@ module.exports = function(client) {
       "before": [
         filters.uuid, 
         filters.hash, 
+        filters.role,
         filters.login_at, 
         filters.login_count, 
         filters.updated_at
@@ -72,6 +73,7 @@ module.exports = function(client) {
         .hmset(key, obj)
         .set(namespace + ":email:" + obj.email, obj.id)
         .set(namespace + ":uuid:" + obj.uuid, obj.id)
+        .zadd(namespace + ":collection:role", obj.role, obj.id)
         .exec(function(err, replies){
           if(!err) cb(null, obj)
         })
@@ -106,6 +108,7 @@ module.exports = function(client) {
       .hmset(key, obj)
       .set(namespace + ":uuid:" + obj.uuid, obj.id)
       .set(namespace + ":email:" + obj.email, obj.id)
+      .zadd(namespace + ":collection:role", obj.role, obj.id)
       .zadd(namespace + ":collection", timestamp, obj.id)
       .exec(function(err, replies){
         if(!err) cb(null, obj)
@@ -116,6 +119,28 @@ module.exports = function(client) {
   account.constructor.prototype.all = function(start, stop, cb){
     var that = this
     client.zrevrange(namespace + ":collection", start, stop, function(err, reply){
+      var total = reply.length
+      var count = 0
+      var transaction = client.multi()
+      reply.forEach(function(id){
+        transaction.hgetall(namespace + ":" + id)
+      })
+      transaction.exec(function(err, replies){
+        replies.forEach(function(obj){
+          that.out(obj, function(record){
+            count++
+            if(count == total){
+              cb(replies)
+            } 
+          })
+        })
+      })
+    })
+  }
+
+  account.constructor.prototype.group = function(role, cb){
+    var that = this
+    client.zrangebyscore(namespace + ":collection:role", role, role, function(err, reply){
       var total = reply.length
       var count = 0
       var transaction = client.multi()

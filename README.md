@@ -111,6 +111,14 @@ OR (search by other params)
       }
     )
 
+## Roles
+
+0 - Owners
+1 - Admin
+2 - Dev
+3 - Employee
+4 - Mod
+5 - Customer
 
 ## License
 
