@@ -33,7 +33,7 @@ describe("all", function(){
   })
 
   after(function(){
-    console.log("\nTests completed in " +  ((end_time - start_time ) / 1000) + " seconds in average\n")
+    console.log("\nGet completed in " +  ((end_time - start_time ) / 1000) + " seconds\n")
     client.flushall()
     client.quit()
   })
