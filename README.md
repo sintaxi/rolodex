@@ -47,7 +47,7 @@ errors it will look like the following...
       ],
       details: {
         "password": "is required",
-        "username": "must be unique"
+        "account": "is not in the system"
       }
     }
 

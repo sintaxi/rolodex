@@ -25,7 +25,7 @@ describe("all", function(){
   })
 
   it("should get all group 5 accounts", function(done) {
-    rolodex.account.group(5, function(accounts){
+    rolodex.account.group(0, function(accounts){
       accounts.should.be.an.instanceof(Array)
       done()
     })
