@@ -3,8 +3,8 @@
 ## Instalation
 
 I always recomend you bundle your dependencies with your application. To do
-this, create a `package.json` file in the root of your project with the minimum
-information...
+this, create a `package.json` file in the root of your project with the
+minimum information...
 
     {
       "name": "yourapplication",
@@ -36,9 +36,9 @@ Now we have rolodex.account object that gives us account management functions.
 
 ### Errors
 
-Anytime errors are accepted as the first argument of the callback it will return
-`null` if the request was successful and if there are validation errors it will
-look like the following...
+Anytime errors are accepted as the first argument of the callback it will
+return `null` if the request was successful and if there are validation
+errors it will look like the following...
 
     {
       messages: [
@@ -77,7 +77,25 @@ Account Object looks like the following...
       }
     )
 
-### account.update(id, props, callback)
+### account.get(q, callback)
+
+    rolodex.account.get(
+      "ojzg-su2w-kqsn",
+      function(account){
+        console.log(account)
+      }
+    )
+
+OR (search by other params)
+
+    rolodex.account.get(
+      { "email": "brock@sintaxi" },
+      function(account){
+        console.log(account)
+      }
+    )
+
+### account.update(q, props, callback)
 
     rolodex.account.update("ojzg-su2w-kqsn", { "email": "fred@sintaxi" },
       function(errors, account){
@@ -85,7 +103,7 @@ Account Object looks like the following...
       }
     )
 
-### account.authenticate(username, password, callback)
+### account.authenticate(q, password, callback)
 
     rolodex.account.authenticate({ email: "brock@sintaxi" }, "something",
       function(errors, account){
