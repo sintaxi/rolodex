@@ -140,23 +140,31 @@ module.exports = function(client) {
 
   account.constructor.prototype.group = function(role, cb){
     var that = this
-    client.zrangebyscore(namespace + ":collection:role", role, role, function(err, reply){
-      var total = reply.length
-      var count = 0
-      var transaction = client.multi()
-      reply.forEach(function(id){
-        transaction.hgetall(namespace + ":" + id)
-      })
-      transaction.exec(function(err, replies){
-        replies.forEach(function(obj){
-          that.out(obj, function(record){
-            count++
-            if(count == total){
-              cb(replies)
-            } 
-          })
+    client.zrevrangebyscore(namespace + ":collection:role", role, role, function(err, reply){
+      if(err){
+        cb([])
+      }else{
+        var transaction = client.multi()
+        reply.forEach(function(id){
+          transaction.hgetall(namespace + ":" + id)
         })
-      })
+        transaction.exec(function(err, replies){
+          var total = replies.length
+          var count = 0
+          if(total == 0){
+            cb([])
+          }else{
+            replies.forEach(function(obj){
+              that.out(obj, function(record){
+                count++
+                if(count >= total){
+                  cb(replies)
+                } 
+              })
+            })
+          }
+        })
+      }
     })
   }
   

@@ -1,10 +1,10 @@
 var should = require("should")
 
-describe("all", function(){
+describe("group", function(){
   var redis = require("redis")
   var client = redis.createClient()
   var rolodex = require("../rolodex")(client)
-  var total = 100
+  var total = 500
 
   before(function(done){
     var count = 0
@@ -24,15 +24,17 @@ describe("all", function(){
 
   })
 
-  it("should get all group 5 accounts", function(done) {
+  it("should get all group 0 accounts", function(done) {
     rolodex.account.group(0, function(accounts){
       accounts.should.be.an.instanceof(Array)
+      //accounts.forEach(function(a){
+      //  a.should.have.property("role", 0)
+      //})
       done()
     })
   })
 
   after(function(){
-    console.log("\nGet completed in " +  ((end_time - start_time ) / 1000) + " seconds\n")
     client.flushall()
     client.quit()
   })
