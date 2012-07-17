@@ -1,11 +1,12 @@
-var Model       = require("../lib/model")
+var Thug        = require("thug")
+
 var filters     = require("../lib/filters")
 var validations = require("../lib/validations")
 var hash        = require("../lib/hash")
 
 module.exports = function(client) {
 
-  var account = new Model({
+  var account = new Thug({
     "locals": {
       "namespace": "account",
       "client": client
@@ -22,16 +23,13 @@ module.exports = function(client) {
         filters.login_count, 
         filters.updated_at
       ],
-      "after": [
-        filters.password
-      ],
+      "after": [],
       "out": [
         filters.clean
       ]
     },
     "validations": {
-      "email"   : [validations.present, validations.email, validations.unique],
-      "password": [validations.presentOnCreate]
+      "email"   : [validations.present, validations.email, validations.unique]
     }
   })
   
