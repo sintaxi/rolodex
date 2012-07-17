@@ -6,10 +6,7 @@ describe("security", function(){
   var rolodex = require("../rolodex")(client)
   
   before(function(done){
-    rolodex.account.create({
-      "email": "brock@sintaxi.com",
-      "password":"foobar"
-      }, function(errors, account){
+    rolodex.account.create({ "email": "brock@sintaxi.com" }, function(errors, account){
       done()
     })
   })

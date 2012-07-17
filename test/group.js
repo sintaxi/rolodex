@@ -10,11 +10,7 @@ describe("group", function(){
     var count = 0
     for(var i = 1; i <= total; i++)(function(i){
       var role = Math.floor(Math.random()*6)
-      rolodex.account.create({
-        "email": "user"+ i +"@sintaxi.com",
-        "password":"foobar",
-        "role": role,
-        }, function(errors, account){
+      rolodex.account.create({ "email": "user"+ i +"@sintaxi.com", "role": role }, function(errors, account){
         count++
         if(count == total){
           done()

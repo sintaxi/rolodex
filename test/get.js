@@ -7,9 +7,7 @@ describe("get", function(){
   
   before(function(done){
     rolodex.account.create({
-      "email": "brock@sintaxi.com",
-      "password":"foobar"
-      }, function(errors, account){
+      "email": "brock@sintaxi.com"}, function(errors, account){
       global.account_id   = account.id
       global.uuid = account.uuid
       done()

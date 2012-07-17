@@ -9,10 +9,7 @@ describe("all", function(){
   before(function(done){
     var count = 0
     for(var i = 1; i <= total; i++)(function(i){
-      rolodex.account.create({
-        "email": "user"+ i +"@sintaxi.com",
-        "password":"foobar"
-        }, function(errors, account){
+      rolodex.account.create({ "email": "user"+ i +"@sintaxi.com" }, function(errors, account){
         count++
         if(count == total){
           done()

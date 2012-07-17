@@ -6,10 +6,7 @@ describe("update", function(){
   var rolodex = require("../rolodex")(client)
   
   before(function(done){
-    rolodex.account.create({
-      "email": "brock@sintaxi.com",
-      "password":"foobar"
-      }, function(errors, account){
+    rolodex.account.create({ "email": "brock@sintaxi.com" }, function(errors, account){
       global.account_id = account.id
       done()
     })
@@ -29,10 +26,7 @@ describe("update", function(){
   })
 
   it("should free up unused email", function(done) {
-    var accountParams = {
-      "email": "brock@sintaxi.com",
-      "password":"foobar"
-    }
+    var accountParams = { "email": "brock@sintaxi.com" }
     rolodex.account.create(accountParams, function(errors, account){
       account.should.have.property("id")
       account.should.have.property("email", "brock@sintaxi.com")
