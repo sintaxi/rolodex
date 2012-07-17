@@ -42,11 +42,9 @@ errors it will look like the following...
 
     {
       messages: [
-        "Password is required",
         "Username must be unique"
       ],
       details: {
-        "password": "is required",
         "account": "is not in the system"
       }
     }
@@ -67,11 +65,7 @@ Account Object looks like the following...
 
 ### account.create(props, callback)
 
-    rolodex.account.create(
-      {
-        "email": "brock@sintaxi.com",
-        "password": "something"
-      },
+    rolodex.account.create({ "email": "brock@sintaxi.com" },
       function(errors, account){
         console.log(account)
       }
@@ -96,14 +90,6 @@ OR (search by other params)
 ### account.update(q, props, callback)
 
     rolodex.account.update("ojzg-su2w-kqsn", { "email": "fred@sintaxi" },
-      function(errors, account){
-        console.log(account)
-      }
-    )
-
-### account.authenticate(q, password, callback)
-
-    rolodex.account.authenticate({ email: "brock@sintaxi" }, "something",
       function(errors, account){
         console.log(account)
       }
