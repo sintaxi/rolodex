@@ -1,5 +1,3 @@
-var base32      = require("base32")
-
 var Model       = require("../lib/model")
 var filters     = require("../lib/filters")
 var validations = require("../lib/validations")
