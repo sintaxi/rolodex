@@ -1,4 +1,4 @@
-# rolodex 
+# rolodex
 
 ## Instalation
 
@@ -79,8 +79,7 @@ Account Object looks like the following...
 
 ### account.get(q, callback)
 
-    rolodex.account.get(
-      "ojzg-su2w-kqsn",
+    rolodex.account.get("ojzg-su2w-kqsn",
       function(account){
         console.log(account)
       }
@@ -88,8 +87,7 @@ Account Object looks like the following...
 
 OR (search by other params)
 
-    rolodex.account.get(
-      { "email": "brock@sintaxi" },
+    rolodex.account.get({ "email": "brock@sintaxi" },
       function(account){
         console.log(account)
       }
@@ -113,12 +111,14 @@ OR (search by other params)
 
 ## Roles
 
-0 - Owners
-1 - Admin
-2 - Dev
-3 - Employee
-4 - Mod
-5 - Customer
+Roles are arbitrary but this is the line of thinking when creating this lib.
+
+    0 - Owners
+    1 - Admin
+    2 - Dev
+    3 - Employee
+    4 - Mod
+    5 - Customer
 
 ## License
 
