@@ -108,7 +108,7 @@ Roles are arbitrary but this is the line of thinking when creating this lib.
 
 ## License
 
-Copyright 2011 Brock Whitten
+Copyright 2011/2012 Chloi Inc.
 All rights reserved.
 
 Permission is hereby granted, free of charge, to any person
