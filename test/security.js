@@ -6,13 +6,13 @@ describe("security", function(){
   var rolodex = require("../rolodex")(client)
   
   before(function(done){
-    rolodex.account.create({ "email": "brock@sintaxi.com" }, function(errors, account){
+    rolodex.account.set(null, { "email": "brock@sintaxi.com" }, function(errors, account){
       done()
     })
   })
 
   it("should not be able to change uuid", function(done) {
-    rolodex.account.update({ email: "brock@sintaxi.com"}, { "uuid": "12345" }, function(errors, account){
+    rolodex.account.set({ email: "brock@sintaxi.com"}, { "uuid": "12345" }, function(errors, account){
       account.should.have.property("id")
       account.should.have.property("uuid")
       account.uuid.should.not.eql("12345")

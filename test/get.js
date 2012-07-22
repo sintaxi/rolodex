@@ -6,7 +6,7 @@ describe("get", function(){
   var rolodex = require("../rolodex")(client)
   
   before(function(done){
-    rolodex.account.create({
+    rolodex.account.set(null, {
       "email": "brock@sintaxi.com"}, function(errors, account){
       global.account_id   = account.id
       global.uuid = account.uuid

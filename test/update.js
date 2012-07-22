@@ -6,14 +6,14 @@ describe("update", function(){
   var rolodex = require("../rolodex")(client)
   
   before(function(done){
-    rolodex.account.create({ "email": "brock@sintaxi.com" }, function(errors, account){
+    rolodex.account.set(null, { "email": "brock@sintaxi.com" }, function(errors, account){
       global.account_id = account.id
       done()
     })
   })
 
   it("should be able to change email", function(done) {
-    rolodex.account.update({ email: "brock@sintaxi.com" } , { "email": "fred@sintaxi.com" }, function(errors, account){
+    rolodex.account.set({ email: "brock@sintaxi.com" } , { "email": "fred@sintaxi.com" }, function(errors, account){
       account.should.have.property("id", account_id)
       account.should.have.property("email", "fred@sintaxi.com")
       account.should.have.property("uuid")
@@ -27,7 +27,7 @@ describe("update", function(){
 
   it("should free up unused email", function(done) {
     var accountParams = { "email": "brock@sintaxi.com" }
-    rolodex.account.create(accountParams, function(errors, account){
+    rolodex.account.set(null, accountParams, function(errors, account){
       account.should.have.property("id")
       account.should.have.property("email", "brock@sintaxi.com")
       account.should.have.property("uuid")

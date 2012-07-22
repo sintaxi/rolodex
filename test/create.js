@@ -8,7 +8,7 @@ describe("create", function(){
   var validAccountDetails = { "email": "brock@sintaxi.com" }
 
   it("should not create account wihtout args", function(done) {
-    rolodex.account.create({}, function(errors, account){
+    rolodex.account.set(null, {}, function(errors, account){
       errors.should.have.property("details")
       errors.should.have.property("messages")
       errors.details.should.have.property("email", "must be present")
@@ -19,7 +19,7 @@ describe("create", function(){
 
   it("should create account", function(done) {
     var accountParams = { "email": "brock@sintaxi.com" }
-    rolodex.account.create(accountParams, function(errors, account){
+    rolodex.account.set(null, accountParams, function(errors, account){
       account.should.have.property("id")
       account.should.have.property("email", "brock@sintaxi.com")
       account.should.have.property("uuid")
@@ -31,10 +31,10 @@ describe("create", function(){
       done()
     })
   })
-
+  
   it("should not create account without unique email", function(done) {
     var accountParams = { "email": "brock@sintaxi.com" }
-    rolodex.account.create(accountParams, function(errors, account){
+    rolodex.account.set(null, accountParams, function(errors, account){
       errors.messages.sort().should.eql(["email already in use"].sort())
       errors.details.should.have.property("email", "already in use")
       done()
@@ -43,15 +43,15 @@ describe("create", function(){
 
   it("should not create account without email", function(done) {
     var accountParams = {}
-    rolodex.account.create(accountParams, function(errors, account){
+    rolodex.account.set(null, accountParams, function(errors, account){
       errors.messages.should.include("email must be present")
       done()
     })
   })
-
+  
   it("should not create account without valid email", function(done) {
     var accountParams = { "email": "brockatsintaxi.com" }
-    rolodex.account.create(accountParams, function(errors, account){
+    rolodex.account.set(null, accountParams, function(errors, account){
       errors.messages.should.include("email must be valid")
       done()
     })

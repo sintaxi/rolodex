@@ -1,5 +1,4 @@
 var Thug        = require("thug")
-
 var filters     = require("../lib/filters")
 var validations = require("../lib/validations")
 var hash        = require("../lib/hash")
@@ -16,14 +15,17 @@ module.exports = function(client) {
         filters.blacklist
       ],
       "before": [
+        filters.id,
         filters.uuid, 
         filters.hash, 
-        filters.role,
-        filters.login_at, 
-        filters.login_count, 
-        filters.updated_at
+        filters.role
       ],
-      "after": [],
+      "after": [
+        filters.login_at, 
+        filters.login_count,
+        filters.updated_at,
+        filters.created_at
+      ],
       "out": [
         filters.clean
       ]
@@ -37,7 +39,6 @@ module.exports = function(client) {
   // - takes an `id`
   // - must fire callback with the record or `null`
   account.constructor.prototype.read = function(q, cb){
- 
     // once done
     var callback = function(err, obj){
       for(var key in obj) break;
@@ -55,61 +56,22 @@ module.exports = function(client) {
   }
   
   // Write the Record
-  // - existing records will have an `id`
-  // - new records will NOT have an `id`
   // - must fire callback with errors or the record
-  account.constructor.prototype.write = function(obj, cb){
-    if(obj.id){
-      // existing
-      var key = namespace + ":" + obj.id
-      client.hgetall(key, function(err, old){
-        client.multi()
-        .del(namespace + ":email:" + old.email)
-        .del(namespace + ":uuid:" + old.uuid)
-        .hmset(key, obj)
-        .set(namespace + ":email:" + obj.email, obj.id)
-        .set(namespace + ":uuid:" + obj.uuid, obj.id)
-        .zadd(namespace + ":collection:role", obj.role, obj.id)
-        .exec(function(err, replies){
-          if(!err) cb(null, obj)
-        })
-      })
-    }else{
-      // new
-      var date = new Date()
-      var timestamp = date.getTime()
-
-      var chars = "0123456789abcdefghiklmnopqrstuvwxyz".split("")
-      var code  = "xxxx".replace(/[x]/g, function(c){ 
-        return chars[Math.floor(Math.random() * chars.length)]
-      })
-      // lets set a human readable id for new accounts
-      // these should remain 9 bits until around year 2056
-      // not perfect but better than auto-inc or uuid IMHO
-      var aid = timestamp
-        .toString(36)
-        .split("")
-        .reverse()
-        .join("")
-        .match(RegExp('.{1,4}', 'g'))
-        .reverse()
-      aid.push(code)
-      obj.id = aid.join("-")
-
-      // use same timestamp for created_at
-      obj.created_at = date.toJSON()
-
-      var key = namespace + ":" + obj.id;
+  account.constructor.prototype.write = function(identifier, obj, cb){
+    var key = namespace + ":" + obj.id
+    client.hgetall(key, function(err, old){
       client.multi()
+      .del(namespace + ":email:" + old.email)
+      .del(namespace + ":uuid:" + old.uuid)
       .hmset(key, obj)
-      .set(namespace + ":uuid:" + obj.uuid, obj.id)
       .set(namespace + ":email:" + obj.email, obj.id)
+      .set(namespace + ":uuid:" + obj.uuid, obj.id)
       .zadd(namespace + ":collection:role", obj.role, obj.id)
-      .zadd(namespace + ":collection", timestamp, obj.id)
+      .zadd(namespace + ":collection", (new Date(obj.created_at).getTime()), obj.id)
       .exec(function(err, replies){
-        if(!err) cb(null, obj)
+        if(!err) cb(obj)
       })
-    }
+    })
   }
 
   account.constructor.prototype.all = function(start, stop, cb){
@@ -166,6 +128,7 @@ module.exports = function(client) {
   
   account.constructor.prototype.authenticate = function(q, password, cb){
     var that = this
+    
     that.read(q, function(obj){
       if(obj){
         if(hash.validate(obj.hash, password)){
@@ -195,8 +158,6 @@ module.exports = function(client) {
         cb(errors, null)
       }
     })
-
-
   }
   
   return account
