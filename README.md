@@ -10,7 +10,7 @@ minimum information...
       "name": "yourapplication",
       "version": "0.1.0",
       "dependencies": {
-        "rolodex": "0.6.1"
+        "rolodex": "0.6.2"
       }
     }
 
@@ -63,9 +63,9 @@ Account Object looks like the following...
       created_at: '2011-09-23T02:17:26.228Z'
     }
 
-### account.create(props, callback)
+### account.set(props, callback)
 
-    rolodex.account.create({ "email": "brock@sintaxi.com" },
+    rolodex.account.set({ "email": "brock@sintaxi.com" },
       function(errors, account){
         console.log(account)
       }
@@ -89,7 +89,7 @@ OR (search by other params)
 
 ### account.update(q, props, callback)
 
-    rolodex.account.update("ojzg-su2w-kqsn", { "email": "fred@sintaxi" },
+    rolodex.account.set("ojzg-su2w-kqsn", { "email": "fred@sintaxi" },
       function(errors, account){
         console.log(account)
       }
