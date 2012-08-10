@@ -60,6 +60,7 @@ module.exports = function(client) {
   account.constructor.prototype.write = function(identifier, obj, cb){
     var key = namespace + ":" + obj.id
     client.hgetall(key, function(err, old){
+      if(!old) old = {};
       client.multi()
       .del(namespace + ":email:" + old.email)
       .del(namespace + ":uuid:" + old.uuid)
