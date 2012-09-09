@@ -1,9 +1,8 @@
 var should = require("should")
+var client = require("redis").createClient()
 
 describe("group", function(){
-  var redis = require("redis")
-  var client = redis.createClient()
-  var rolodex = require("../rolodex")(client)
+  var rolodex = require("../rolodex")()
   var total = 500
 
   before(function(done){

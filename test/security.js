@@ -1,9 +1,8 @@
 var should = require("should")
+var client = require("redis").createClient()
 
 describe("security", function(){
-  var redis = require("redis")
-  var client = redis.createClient()
-  var rolodex = require("../rolodex")(client)
+  var rolodex = require("../rolodex")()
   
   before(function(done){
     rolodex.account.set({ "email": "brock@sintaxi.com" }, function(errors, account){
