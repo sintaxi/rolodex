@@ -41,9 +41,9 @@ module.exports = function(client) {
   // - must fire callback with the record or `null`
   account.constructor.prototype.read = function(q, cb){
     // once done
+    
     var callback = function(err, obj){
-      for(var key in obj) break;
-      key ? cb(obj) : cb(null)
+      cb(obj)
     }
 
     if(typeof q == 'object'){
