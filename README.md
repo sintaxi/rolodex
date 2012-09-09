@@ -24,13 +24,10 @@ OR, if you just want to start playing with the library run...
 
 ## Docs
 
-To create a rolodex object that gives us user management functions we must
-first pass in a redis client for it to use. require the library `redis` and
-then pass it as an argument to the `rolodex` lib. 
+To create a rolodex object that gives us user management functions we must pass
+in our redis credentials to the redis server we wish to connect to.
 
-    var redis   = require("redis")
-    var client  = redis.createClient()
-    var rolodex = require("rolodex")(client)
+    var rolodex = require("rolodex")(redisArgs)
 
 Now we have rolodex.account object that gives us account management functions.
 
