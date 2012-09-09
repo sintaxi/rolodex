@@ -40,9 +40,10 @@ module.exports = function(client) {
   // - takes an `id`
   // - must fire callback with the record or `null`
   account.constructor.prototype.read = function(q, cb){
-    // once done
-    
+
+    // DRY - simplify to one callback
     var callback = function(err, obj){
+      if(err) return cb(null)
       cb(obj)
     }
 
