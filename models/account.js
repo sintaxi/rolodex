@@ -28,10 +28,11 @@ module.exports = function(client) {
       "before": [
         filters.id,
         filters.uuid, 
-        filters.hash, 
         filters.role
       ],
       "after": [
+        filters.hash, 
+        filters.password,
         filters.verified_at,
         filters.login_at, 
         filters.login_count,
@@ -43,7 +44,8 @@ module.exports = function(client) {
       ]
     },
     "validations": {
-      "email"         : [validations.present, validations.email, validations.unique, validations.verifiedEmail]
+      "email"         : [validations.present, validations.email, validations.unique, validations.verifiedEmail],
+      "password"      : [validations.presentPassword, validations.confirmation]
     }
   })
   
