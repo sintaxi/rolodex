@@ -16,7 +16,6 @@ describe("create by verified email", function(){
       errors.should.have.property("messages")
       errors.details.should.have.property("email", "must be present")
       errors.messages.should.include("email must be present")
-      errors.messages.should.include("email_verified must exist")
       done()
     })
   })
@@ -24,7 +23,15 @@ describe("create by verified email", function(){
   it("should not create account without email verified property", function(done) {
     var accountParams = { "email": "brock@example.com" }
     rolodex.account.set(accountParams, function(errors, account){
-      errors.messages.should.include("email_verified must exist")
+      errors.messages.should.include("email must be verified")
+      done()
+    })
+  })
+
+  it("should not create account with verified property set to false", function(done) {
+    var accountParams = { "email": "brock@example.com", "email_verified": false }
+    rolodex.account.set(accountParams, function(errors, account){
+      errors.messages.should.include("email must be verified")
       done()
     })
   })
@@ -45,7 +52,7 @@ describe("create by verified email", function(){
   })
   
   it("should not create account without unique email", function(done) {
-    var accountParams = { "email": "brock@sintaxi.com" }
+    var accountParams = { "email": "brock@sintaxi.com", "email_verified": true }
     rolodex.account.set(accountParams, function(errors, account){
       errors.messages.should.include("email already in use")
       errors.details.should.have.property("email", "already in use")
@@ -53,6 +60,14 @@ describe("create by verified email", function(){
     })
   })
 
+  it("should not create account with verified set to false", function(done) {
+    var accountParams = { "email": "brock@something.com", "email_verified": false }
+    rolodex.account.set(accountParams, function(errors, account){
+      errors.messages.should.include("email must be verified")
+      errors.details.should.have.property("email", "must be verified")
+      done()
+    })
+  })
   
   it("should not create account without valid email", function(done) {
     var accountParams = { "email": "brockatsintaxi.com" }

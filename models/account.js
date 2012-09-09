@@ -43,8 +43,7 @@ module.exports = function(client) {
       ]
     },
     "validations": {
-      "email"         : [validations.present, validations.email, validations.unique],
-      "email_verified": [validations.existOnCreate]
+      "email"         : [validations.present, validations.email, validations.unique, validations.verifiedEmail]
     }
   })
   
