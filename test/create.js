@@ -1,27 +1,40 @@
 var should = require("should")
 var client = require("redis").createClient()
 
-describe("create", function(){  
+describe("create by verified email", function(){
   var rolodex = require("../rolodex")()
 
-  var validAccountDetails = { "email": "brock@sintaxi.com" }
+  var validAccountDetails = { 
+    "email": "brock@sintaxi.com",
+    "email_verified": true
+  }
 
-  it("should not create account wihtout args", function(done) {
-    rolodex.account.set({}, function(errors, account){
+  it("should not create account without args", function(done) {
+    var accountParams = {}
+    rolodex.account.set(accountParams, function(errors, account){
       errors.should.have.property("details")
       errors.should.have.property("messages")
       errors.details.should.have.property("email", "must be present")
       errors.messages.should.include("email must be present")
+      errors.messages.should.include("email_verified must exist")
+      done()
+    })
+  })
+
+  it("should not create account without email verified property", function(done) {
+    var accountParams = { "email": "brock@example.com" }
+    rolodex.account.set(accountParams, function(errors, account){
+      errors.messages.should.include("email_verified must exist")
       done()
     })
   })
 
   it("should create account", function(done) {
-    var accountParams = { "email": "brock@sintaxi.com" }
-    rolodex.account.set(accountParams, function(errors, account){
+    rolodex.account.set(validAccountDetails, function(errors, account){
       account.should.have.property("id")
       account.should.have.property("email", "brock@sintaxi.com")
       account.should.have.property("uuid")
+      account.should.have.property("email_verified_at")
       account.should.have.property("login_at")
       account.should.have.property("login_count", 0)
       account.should.have.property("created_at")
@@ -34,19 +47,12 @@ describe("create", function(){
   it("should not create account without unique email", function(done) {
     var accountParams = { "email": "brock@sintaxi.com" }
     rolodex.account.set(accountParams, function(errors, account){
-      errors.messages.sort().should.eql(["email already in use"].sort())
+      errors.messages.should.include("email already in use")
       errors.details.should.have.property("email", "already in use")
       done()
     })
   })
 
-  it("should not create account without email", function(done) {
-    var accountParams = {}
-    rolodex.account.set(accountParams, function(errors, account){
-      errors.messages.should.include("email must be present")
-      done()
-    })
-  })
   
   it("should not create account without valid email", function(done) {
     var accountParams = { "email": "brockatsintaxi.com" }

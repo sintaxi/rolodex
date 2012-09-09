@@ -5,10 +5,14 @@ describe("get", function(){
   var rolodex = require("../rolodex")()
   
   before(function(done){
-    rolodex.account.set({"email": "brock@sintaxi.com"}, function(errors, account){
-      global.account_id   = account.id
+    var validAccountDetails = { 
+      "email": "brock@sintaxi.com",
+      "email_verified": true
+    }
+
+    rolodex.account.set(validAccountDetails, function(errors, account){
+      global.account_id = account.id
       global.uuid = account.uuid
-      
       done()
     })
   })

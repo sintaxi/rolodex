@@ -5,7 +5,11 @@ describe("update", function(){
   var rolodex = require("../rolodex")()
   
   before(function(done){
-    rolodex.account.set({ "email": "brock@sintaxi.com" }, function(errors, account){
+    var validAccountDetails = { 
+      "email": "brock@sintaxi.com",
+      "email_verified": true
+    }
+    rolodex.account.set(validAccountDetails, function(errors, account){
       global.account_id = account.id
       done()
     })
@@ -25,7 +29,7 @@ describe("update", function(){
   })
 
   it("should free up unused email", function(done) {
-    var accountParams = { "email": "brock@sintaxi.com" }
+    var accountParams = { "email": "brock@sintaxi.com", "email_verified": true }
     rolodex.account.set(accountParams, function(errors, account){
       account.should.have.property("id")
       account.should.have.property("email", "brock@sintaxi.com")

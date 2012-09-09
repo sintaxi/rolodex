@@ -5,6 +5,17 @@ var hash        = require("../lib/hash")
 
 module.exports = function(client) {
 
+  var email_verified = {
+    exist: function(field, obj, errors, next){
+      if(hasOwnProperty(field)){
+        next()
+      }else{
+        errors.push("must be true")
+        next()
+      }
+    } 
+  }
+
   var account = new Thug({
     "locals": {
       "namespace": "account",
@@ -21,6 +32,7 @@ module.exports = function(client) {
         filters.role
       ],
       "after": [
+        filters.verified_at,
         filters.login_at, 
         filters.login_count,
         filters.updated_at,
@@ -31,7 +43,8 @@ module.exports = function(client) {
       ]
     },
     "validations": {
-      "email"   : [validations.present, validations.email, validations.unique]
+      "email"         : [validations.present, validations.email, validations.unique],
+      "email_verified": [validations.existOnCreate]
     }
   })
   
