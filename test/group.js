@@ -9,6 +9,7 @@ describe("group", function(){
     var count = 0
     for(var i = 1; i <= total; i++)(function(i){
       var role = Math.floor(Math.random()*6)
+      
       rolodex.account.set({ "email": "user"+ i +"@sintaxi.com", "role": role, "email_verified": true }, function(errors, account){
         count++
         if(count == total){
