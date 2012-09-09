@@ -39,10 +39,12 @@ errors it will look like the following...
 
     {
       messages: [
-        "Username must be unique"
+        "Email must be unique"
+        "Password confirmation must match"
       ],
       details: {
-        "account": "is not in the system"
+        "email": "must be unique"
+        "password": "confirmation must match"
       }
     }
 
@@ -60,7 +62,12 @@ Account Object looks like the following...
       created_at: '2011-09-23T02:17:26.228Z'
     }
 
-### account.set(props, callback)
+The account object gives you to basic functions `set` and `get`. The
+
+### account.set([identifier,] props, callback)
+
+If an identifier is provied, the set will perform an update on that record.
+If no identifier is profided, it will create the record.
 
     rolodex.account.set({ "email": "brock@sintaxi.com" },
       function(errors, account){
@@ -68,7 +75,7 @@ Account Object looks like the following...
       }
     )
 
-### account.get(q, callback)
+### account.get(identifier, callback)
 
     rolodex.account.get("ojzg-su2w-kqsn",
       function(account){
@@ -76,18 +83,16 @@ Account Object looks like the following...
       }
     )
 
-OR (search by other params)
+The following are possible values for identifier.
+
+  - account id (String). eg "ojzg-su2w-kgsn"
+  - uuid key value pair (Object). eg `{ uuid: "fdc7af2d-f3c2-4475-bb1c-7a17caed3564"}`  
+  - email key value pair (Object). eg `{ email: "hey@man.com"}`  
+
+OR (find by other params)
 
     rolodex.account.get({ "email": "brock@sintaxi" },
       function(account){
-        console.log(account)
-      }
-    )
-
-### account.update(q, props, callback)
-
-    rolodex.account.set("ojzg-su2w-kqsn", { "email": "fred@sintaxi" },
-      function(errors, account){
         console.log(account)
       }
     )
