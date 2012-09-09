@@ -89,13 +89,27 @@ The following are possible values for identifier.
   - uuid key value pair (Object). eg `{ uuid: "fdc7af2d-f3c2-4475-bb1c-7a17caed3564"}`  
   - email key value pair (Object). eg `{ email: "hey@man.com"}`  
 
-OR (find by other params)
+Eg. (find by params other than id)
 
     rolodex.account.get({ "email": "brock@sintaxi" },
       function(account){
         console.log(account)
       }
     )
+
+### Account Creation
+
+There is two ways to create an account...
+
+1) Provide a password and password\_confirmation along with email. This would
+be for your standard account registration paradigm.
+
+2) If you are creating the account with a previously verified email you can
+bypass the password requirement by passing in a `{ email_verified: true }`.
+This is suitable when authentication was done via browserid or any other 3rd
+party authentication system that requires an email verification step. If this
+step is chosen, the `email_verified_at` timestamp will be set.
+
 
 ## Roles
 
