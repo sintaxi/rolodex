@@ -101,6 +101,7 @@ module.exports = function(client) {
 
   account.constructor.prototype.group = function(role, cb){
     var that = this
+
     client.zrevrangebyscore(namespace + ":collection:role", role, role, function(err, reply){
       if(err){
         cb([])
