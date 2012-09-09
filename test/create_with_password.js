@@ -32,8 +32,6 @@ describe("create by password", function(){
       account.should.have.property("email", "brock@sintaxi.com")
       account.should.have.property("uuid")
       account.should.have.property("email_verified_at")
-      account.should.have.property("login_at")
-      account.should.have.property("login_count", 0)
       account.should.have.property("created_at")
       account.should.have.property("updated_at")
       account.should.not.have.property("password")

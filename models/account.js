@@ -23,8 +23,6 @@ module.exports = function(client) {
         filters.hash, 
         filters.password,
         filters.verified_at,
-        filters.login_at, 
-        filters.login_count,
         filters.updated_at,
         filters.created_at
       ],
