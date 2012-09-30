@@ -14,12 +14,12 @@ module.exports = function(client) {
       "in": [
         filters.blacklist
       ],
-      "before": [
+      "beforeValidate": [
         filters.id,
         filters.uuid, 
         filters.role
       ],
-      "after": [
+      "beforeWrite": [
         filters.hash, 
         filters.password,
         filters.verified_at,
@@ -40,7 +40,9 @@ module.exports = function(client) {
   // - takes an `id`
   // - must fire callback with the record or `null`
   account.constructor.prototype.read = function(q, cb){
-
+    var namespace = this.locals.namespace
+    var client    = this.locals.client
+    
     // DRY - simplify to one callback
     var callback = function(err, obj){
       if(err) return cb(null)
@@ -60,6 +62,9 @@ module.exports = function(client) {
   // Write the Record
   // - must fire callback with errors or the record
   account.constructor.prototype.write = function(identifier, obj, cb){
+    var namespace = this.locals.namespace
+    var client    = this.locals.client
+    
     var key = namespace + ":" + obj.id
     client.hgetall(key, function(err, old){
       if(!old) old = {};
@@ -78,7 +83,10 @@ module.exports = function(client) {
   }
 
   account.constructor.prototype.all = function(start, stop, cb){
+    var namespace = this.locals.namespace
+    var client    = this.locals.client
     var that = this
+
     client.zrevrange(namespace + ":collection", start, stop, function(err, reply){
       var total = reply.length
       var count = 0
@@ -100,6 +108,8 @@ module.exports = function(client) {
   }
 
   account.constructor.prototype.group = function(role, cb){
+    var namespace = this.locals.namespace
+    var client    = this.locals.client
     var that = this
 
     client.zrevrangebyscore(namespace + ":collection:role", role, role, function(err, reply){
@@ -131,7 +141,10 @@ module.exports = function(client) {
   }
   
   account.constructor.prototype.authenticate = function(q, password, cb){
+    var namespace = this.locals.namespace
+    var client    = this.locals.client
     var that = this
+    
     that.read(q, function(obj){
       if(!obj){
         return cb({
