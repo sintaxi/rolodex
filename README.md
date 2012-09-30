@@ -56,8 +56,7 @@ Account Object looks like the following...
       id: 'ojzg-su2w-kqsn',
       uuid: 'b902b494-3392-4499-958b-2698b8ae411e',
       email: 'brock@sintaxi.com',
-      login_at: '2011-10-23T05:18:31.229Z',
-      login_count: 84,
+      email_verified_at: '2011-09-23T02:17:26.229Z',
       updated_at: '2011-09-23T02:17:26.229Z',
       created_at: '2011-09-23T02:17:26.228Z'
     }

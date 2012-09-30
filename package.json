@@ -17,7 +17,7 @@
     "bcrypt": "0.7.2",
     "node-uuid": "1.3.1",
     "validator": "0.2.8",
-    "thug": "0.2.2"
+    "thug": "0.3.0"
   },
   "devDependencies": {
     "mocha": "0.10.2",
