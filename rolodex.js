@@ -1,4 +1,5 @@
 var redis = require("redis")
+var dnode = require("dnode")
 
 module.exports = function(options) {
   
@@ -6,7 +7,11 @@ module.exports = function(options) {
   var account = require("./models/account")(client)
   
   return {
-    account: account
+    account: account,
+    
+    listen: function(args){
+      dnode(account).listen(args)
+    }
   }
   
 }
