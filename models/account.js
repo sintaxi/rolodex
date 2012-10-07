@@ -34,10 +34,92 @@ module.exports = function(client) {
       "email"         : [validations.present, validations.email, validations.unique, validations.verifiedEmail],
       "password"      : [validations.presentPassword, validations.confirmation]
     },
-    "methods", {
-      foo: function(){
-        console.log("called foo")
+    "methods": {
+      authenticate: function(q, password, cb){
+        var namespace = this.locals.namespace
+        var client    = this.locals.client
+        var that      = this
+      
+        that.read(q, function(obj){
+          if(!obj){
+            return cb({
+              details: {"account": "is not in the system"},
+              messages: ["account is not in the system"]
+            }, null)
+          }
+          hash.validate(password, obj.hash, function(err, rsp){
+            if(rsp === true){
+              that.get(obj.id, function(record){
+                cb(null, record)
+              })
+            }else{
+              cb({
+                details: {"password": "is not correct"},
+                messages: ["password is not correct"]
+              }, null)
+            }
+          })
+        })
+      },
+      
+      group: function(role, cb){
+        var namespace = this.locals.namespace
+        var client    = this.locals.client
+        var that      = this
+
+        client.zrevrangebyscore(namespace + ":collection:role", role, role, function(err, reply){
+          if(err){
+            cb([])
+          }else{
+            var transaction = client.multi()
+            reply.forEach(function(id){
+              transaction.hgetall(namespace + ":" + id)
+            })
+            transaction.exec(function(err, replies){
+              var total = replies.length
+              var count = 0
+              if(total == 0){
+                cb([])
+              }else{
+                replies.forEach(function(obj){
+                  that.out(obj, function(record){
+                    count++
+                    if(count >= total){
+                      cb(replies)
+                    } 
+                  })
+                })
+              }
+            })
+          }
+        })
+      },
+      
+      all: function(start, stop, cb){
+        var namespace = this.locals.namespace
+        var client    = this.locals.client
+        var that      = this
+      
+        client.zrevrange(namespace + ":collection", start, stop, function(err, reply){
+          var total = reply.length
+          var count = 0
+          var transaction = client.multi()
+          reply.forEach(function(id){
+            transaction.hgetall(namespace + ":" + id)
+          })
+          transaction.exec(function(err, replies){
+            replies.forEach(function(obj){
+              that.out(obj, function(record){
+                count++
+                if(count == total){
+                  cb(replies)
+                } 
+              })
+            })
+          })
+        })
       }
+      
     }
   })
   
@@ -87,90 +169,5 @@ module.exports = function(client) {
     })
   }
 
-  account.constructor.prototype.all = function(start, stop, cb){
-    var namespace = this.locals.namespace
-    var client    = this.locals.client
-    var that = this
-
-    client.zrevrange(namespace + ":collection", start, stop, function(err, reply){
-      var total = reply.length
-      var count = 0
-      var transaction = client.multi()
-      reply.forEach(function(id){
-        transaction.hgetall(namespace + ":" + id)
-      })
-      transaction.exec(function(err, replies){
-        replies.forEach(function(obj){
-          that.out(obj, function(record){
-            count++
-            if(count == total){
-              cb(replies)
-            } 
-          })
-        })
-      })
-    })
-  }
-
-  account.constructor.prototype.group = function(role, cb){
-    var namespace = this.locals.namespace
-    var client    = this.locals.client
-    var that = this
-
-    client.zrevrangebyscore(namespace + ":collection:role", role, role, function(err, reply){
-      if(err){
-        cb([])
-      }else{
-        var transaction = client.multi()
-        reply.forEach(function(id){
-          transaction.hgetall(namespace + ":" + id)
-        })
-        transaction.exec(function(err, replies){
-          var total = replies.length
-          var count = 0
-          if(total == 0){
-            cb([])
-          }else{
-            replies.forEach(function(obj){
-              that.out(obj, function(record){
-                count++
-                if(count >= total){
-                  cb(replies)
-                } 
-              })
-            })
-          }
-        })
-      }
-    })
-  }
-  
-  account.constructor.prototype.authenticate = function(q, password, cb){
-    var namespace = this.locals.namespace
-    var client    = this.locals.client
-    var that = this
-    
-    that.read(q, function(obj){
-      if(!obj){
-        return cb({
-          details: {"account": "is not in the system"},
-          messages: ["account is not in the system"]
-        }, null)
-      }
-      hash.validate(password, obj.hash, function(err, rsp){
-        if(rsp === true){
-          that.get(obj.id, function(record){
-            cb(null, record)
-          })
-        }else{
-          cb({
-            details: {"password": "is not correct"},
-            messages: ["password is not correct"]
-          }, null)
-        }
-      })
-    })
-  }
-  
   return account
 }

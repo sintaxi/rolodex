@@ -1,8 +1,10 @@
+var fs     = require("fs")
 var should = require("should")
 var client = require("redis").createClient()
+var config = JSON.parse(fs.readFileSync(__dirname + "/config.json"))
 
 describe("group", function(){
-  var rolodex = require("../rolodex")()
+  var rolodex = require("../rolodex")(config)
   var total = 500
 
   before(function(done){
@@ -16,7 +18,6 @@ describe("group", function(){
         }
       })
     })(i)
-
   })
 
   it("should get all group 0 accounts", function(done) {

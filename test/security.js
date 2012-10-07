@@ -1,8 +1,10 @@
+var fs     = require("fs")
 var should = require("should")
 var client = require("redis").createClient()
+var config = JSON.parse(fs.readFileSync(__dirname + "/config.json"))
 
 describe("security", function(){
-  var rolodex = require("../rolodex")()
+  var rolodex = require("../rolodex")(config)
   
   before(function(done){
     var validAccountDetails = { 
