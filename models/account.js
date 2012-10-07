@@ -33,6 +33,11 @@ module.exports = function(client) {
     "validations": {
       "email"         : [validations.present, validations.email, validations.unique, validations.verifiedEmail],
       "password"      : [validations.presentPassword, validations.confirmation]
+    },
+    "methods", {
+      foo: function(){
+        console.log("called foo")
+      }
     }
   })
   
