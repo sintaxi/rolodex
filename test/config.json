@@ -1,4 +1,3 @@
 {
-  "role": "slave",
-  "port": 5002
+  "role": "master"
 }
