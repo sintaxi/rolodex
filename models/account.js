@@ -125,19 +125,11 @@ module.exports = function(config) {
       },
       
       email: function(identifier, msg, cb){
-        var that = this
-        that.read(identifier, function(record){
-          if(!record){
-            return cb({
-              details: {"account": "is not in the system"},
-              messages: ["account is not in the system"]
-            }, null)
-          }else{
-            msg.to = record.email
-            message.set(msg, function(errors, reply){
-              cb(errors, reply)
-            })
-          }
+        this.read(identifier, function(record){
+          if(record) msg.to = record.email
+          message.set(msg, function(errors, reply){
+            cb(errors, reply)
+          })
         })
       }
       

@@ -21,9 +21,8 @@ describe("email", function(){
   })
 
   it("should get validation error when account not in the sytem", function(done) {
-   rolodex.account.email({ email: "batman@sintaxi.com" }, {}, function(errors, account){
-     errors.details.should.have.property("account", "is not in the system")
-     errors.messages.should.eql(["account is not in the system"])
+   rolodex.account.email({ email: "batman@sintaxi.com" }, validEmail, function(errors, account){
+     errors.details.should.have.property("to", "must be present")
      done()
    })
   })
