@@ -3,6 +3,8 @@ var filters     = require("../lib/filters")
 var validations = require("../lib/validations")
 var hash        = require("../lib/hash")
 
+var message     = require("./message")
+
 module.exports = function(client) {
 
   var account = new Thug({
@@ -119,6 +121,13 @@ module.exports = function(client) {
           })
         })
       }
+      
+      email: function(identifier, stop, cb){
+        var that = this
+        
+        cb(null)
+      }
+      
       
     }
   })
