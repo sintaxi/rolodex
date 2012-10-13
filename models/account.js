@@ -3,14 +3,16 @@ var filters     = require("../lib/filters")
 var validations = require("../lib/validations")
 var hash        = require("../lib/hash")
 
-var message     = require("./message")
-
-module.exports = function(client) {
+module.exports = function(config) {
+  config       = config || {}
+  config.email = config.email || {}
+  
+  var message = require("./message")(config.email)
 
   var account = new Thug({
     "locals": {
       "namespace": "account",
-      "client": client
+      "client": config.client
     },
     "filters": {
       "in": [
@@ -120,14 +122,24 @@ module.exports = function(client) {
             })
           })
         })
-      }
+      },
       
-      email: function(identifier, stop, cb){
+      email: function(identifier, msg, cb){
         var that = this
-        
-        cb(null)
+        that.read(identifier, function(record){
+          if(!record){
+            return cb({
+              details: {"account": "is not in the system"},
+              messages: ["account is not in the system"]
+            }, null)
+          }else{
+            msg.to = record.email
+            message.set(msg, function(errors, reply){
+              cb(errors, reply)
+            })
+          }
+        })
       }
-      
       
     }
   })

@@ -69,9 +69,15 @@ module.exports = function(options) {
 
   }else{
     // master
+    options.store = options.store || {}
+    options.email = options.email || {}
     
-    var client = redis.createClient(options.redis)
-    var account = require("./models/account")(client)
+    var client = redis.createClient(options.store.redis)
+    
+    var account = require("./models/account")({
+      client: client,
+      email : options.email
+    })
     
     return {
       account: account,

@@ -2,23 +2,43 @@ var request     = require("request")
 var Thug        = require("thug")
 var validations = require("../lib/validations")
 
-var setReplyTo = function(obj, next){
-  if(!obj.hasOwnProperty("reply_to")) obj.reply_to = obj.from
+var setFrom = function(obj, next){
+  if(!obj.hasOwnProperty("from")){
+    obj.from = this.locals.defaults.from || ""
+  }
   next(obj)
 }
 
-module.exports = function(PostmarkCreds) {
+var setReplyTo = function(obj, next){
+  if(!obj.hasOwnProperty("reply_to")){
+    obj.reply_to = this.locals.defaults.reply_to || obj.from
+  }
+  next(obj)
+}
 
+/*
+  {
+     "defaults": {
+       "reply_to": "...",
+       "from": "..."       
+     }
+     "postmark": { token: "..." }
+  }
+*/
+module.exports = function(config) {
+  config          = config || {}
+  config.defaults = config.defaults || {}
+  config.postmark = config.postmark || {}
+  
   var message = new Thug({
-    "locals": {
-      "creds": PostmarkCreds
-    },
+    "locals": config,
     "filters":{
-      "beforeWrite": [setReplyTo]
+      "beforeValidate": [setFrom, setReplyTo]
     },
     "validations": {
       "from"    : [validations.present, validations.email],
       "to"      : [validations.present, validations.email],
+      "replyTo" : [validations.present, validations.email],
       "subject" : [validations.present],
       "body"    : [validations.present]
     }
@@ -43,7 +63,7 @@ module.exports = function(PostmarkCreds) {
       "headers" : {
         "Accept"                  : "application/json",
         "Content-Type"            : "application/json",
-        "X-Postmark-Server-Token" : PostmarkCreds.token
+        "X-Postmark-Server-Token" : this.locals.postmark.token
       }
     }
 
@@ -54,11 +74,13 @@ module.exports = function(PostmarkCreds) {
         }else{
           cb(b)
         }
-      })      
-    }else{
+      })
+    }else if(process.env.NODE_ENV == "development"){
       console.log("email...")
       console.log(body)
       console.log("")
+      cb(null, obj)
+    }else{
       cb(null, obj)
     }
 
