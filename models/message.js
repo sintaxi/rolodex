@@ -38,7 +38,7 @@ module.exports = function(config) {
     "validations": {
       "from"    : [validations.present, validations.email],
       "to"      : [validations.present, validations.email],
-      "replyTo" : [validations.present, validations.email],
+      "reply_to": [validations.present, validations.email],
       "subject" : [validations.present],
       "body"    : [validations.present]
     }
@@ -70,18 +70,18 @@ module.exports = function(config) {
     if(process.env.NODE_ENV == "production"){
       request(args, function(e, r, b){
         if(r.statusCode == 200){
-          cb(null, obj)
+          cb(obj)
         }else{
-          cb(b)
+          cb(null)
         }
       })
     }else if(process.env.NODE_ENV == "development"){
       console.log("email...")
       console.log(body)
       console.log("")
-      cb(null, obj)
+      cb(obj)
     }else{
-      cb(null, obj)
+      cb(obj)
     }
 
   }
