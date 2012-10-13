@@ -3,12 +3,7 @@ var should = require("should")
 var client = require("redis").createClient()
 var config = JSON.parse(fs.readFileSync(__dirname + "/config.json"))
 
-describe("email", function(){
-  
-  config.email = {
-    defaults: { from: "info@chloi.io" }
-  }
-  
+describe("email", function(){  
   var rolodex = require("../rolodex")(config)
    
   var validEmail = {
