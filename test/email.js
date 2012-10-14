@@ -26,7 +26,7 @@ describe("email", function(){
      done()
    })
   })
-
+  
   it("should get validation error wih incorrect params", function(done) {
    rolodex.account.email({ email: "brock@sintaxi.com" }, {}, function(errors, account){
      errors.details.should.have.property("subject", "must be present")
@@ -37,8 +37,8 @@ describe("email", function(){
 
   it("should return message object if successful", function(done) {
    rolodex.account.email({ email: "brock@sintaxi.com" }, validEmail, function(errors, message){
-     message.should.have.property("from", "info@chloi.io")
-     message.should.have.property("to", "brock@sintaxi.com")
+     message.should.have.property("from")
+     message.should.have.property("to")
      message.should.have.property("subject")
      message.should.have.property("body")
      done()

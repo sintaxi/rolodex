@@ -55,18 +55,18 @@ module.exports = function(options) {
       
       email: function(){
         var args = Array.prototype.slice.call(arguments);
-
+        // this is a mess
         if(options.hasOwnProperty("email")){
           if(options.email.hasOwnProperty("postmark")){
             args[1]["postmark"] = options.email.postmark
           } 
           if(options.email.hasOwnProperty("defaults")){
-            // if(!args[1].from && options.email.defaults.hasOwnProperty("from")){
-            //   args[1]["from"] = options.email.defaults.from
-            // }
-            // if(!args[1].reply_to && options.email.defaults.hasOwnProperty("reply_to")){
-            //   args[1]["reply_to"] = options.email.defaults.reply_to
-            // }
+            if(!args[1].hasOwnProperty("from") && options.email.defaults.hasOwnProperty("from")){
+              args[1]["from"] = options.email.defaults.from
+            }
+            if(!args[1].hasOwnProperty("reply_to") && options.email.defaults.hasOwnProperty("reply_to")){
+              args[1]["reply_to"] = options.email.defaults.reply_to
+            }
           }
         }
         up(function(rolodex){
