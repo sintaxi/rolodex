@@ -124,7 +124,7 @@ module.exports = function(config) {
         })
       },
       
-      email: function(identifier, msg, cb){
+      email: function(identifier, msg, cb){        
         this.read(identifier, function(record){
           if(record) msg.to = record.email
           message.set(msg, function(errors, reply){

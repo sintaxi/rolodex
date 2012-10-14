@@ -51,6 +51,27 @@ module.exports = function(options) {
         up(function(rolodex){
           rolodex.account.all.apply(rolodex.account, args)
         })
+      },
+      
+      email: function(){
+        var args = Array.prototype.slice.call(arguments);
+
+        if(options.hasOwnProperty("email")){
+          if(options.email.hasOwnProperty("postmark")){
+            args[1]["postmark"] = options.email.postmark
+          } 
+          if(options.email.hasOwnProperty("defaults")){
+            // if(!args[1].from && options.email.defaults.hasOwnProperty("from")){
+            //   args[1]["from"] = options.email.defaults.from
+            // }
+            // if(!args[1].reply_to && options.email.defaults.hasOwnProperty("reply_to")){
+            //   args[1]["reply_to"] = options.email.defaults.reply_to
+            // }
+          }
+        }
+        up(function(rolodex){
+          rolodex.account.email.apply(rolodex.account, args)
+        })
       }
     }
 

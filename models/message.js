@@ -48,6 +48,14 @@ module.exports = function(config) {
   message.constructor.prototype.write = function(identifier, obj, cb){
     // send message here
     
+    // let slave pass in postmark token
+    if(obj.hasOwnProperty("postmark")){
+      var postmark = obj.postmark
+      delete obj.postmark
+    }else{
+      var postmark = this.locals.postmark
+    }
+    
     var body = {
       "To"        : obj.to,
       "From"      : obj.from,
@@ -63,7 +71,7 @@ module.exports = function(config) {
       "headers" : {
         "Accept"                  : "application/json",
         "Content-Type"            : "application/json",
-        "X-Postmark-Server-Token" : this.locals.postmark.token
+        "X-Postmark-Server-Token" : postmark
       }
     }
 
