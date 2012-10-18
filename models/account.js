@@ -103,7 +103,14 @@ module.exports = function(config) {
         var namespace = this.locals.namespace
         var client    = this.locals.client
         var that      = this
+        
+        if(!stop){
+          cb    = start
+          start = 0
+          stop  = -1
+        }
       
+        
         client.zrevrange(namespace + ":collection", start, stop, function(err, reply){
           var total = reply.length
           var count = 0
