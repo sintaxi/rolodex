@@ -25,11 +25,38 @@ OR, if you just want to start playing with the library run...
 ## Docs
 
 To create a rolodex object that gives us user management functions we must pass
-in our redis credentials to the redis server we wish to connect to.
+in a configuration object.
 
-    var rolodex = require("rolodex")(redisArgs)
+    var rolodex = require("rolodex")(config)
+    
+## Configuration
 
-Now we have rolodex.account object that gives us account management functions.
+Rolodex can run in two different modes. `master` and `slave`.
+
+Example of master configuration object...
+
+    {
+      "role": "master",
+      "email": {
+        "postmark": "dc2d8r99-771e-4d6f-95b8-3403e1bd5poi",
+        "defaults": {
+          "from"    : "thurston.moore@sonicyouth.com",
+          "reply_to": "kim@sonicyouth.com"
+        }
+      },
+      "redis": {
+        ...
+      }
+    }
+
+Example of master configuration object...
+
+    {
+      "role": "slave",
+      "master": {
+        ...
+      }
+    }
 
 ### Errors
 
@@ -61,26 +88,43 @@ Account Object looks like the following...
       created_at: '2011-09-23T02:17:26.228Z'
     }
 
-The account object gives you to basic functions `set` and `get`. The
+The account object gives you two basic functions `set` and `get`. The
 
 ### account.set([identifier,] props, callback)
 
-If an identifier is provied, the set will perform an update on that record.
-If no identifier is profided, it will create the record.
+You are to provide an identifier if you wish to update the record. 
+Otherwise rolodex will assume a new record is being created.
 
-    rolodex.account.set({ "email": "brock@sintaxi.com" },
-      function(errors, account){
-        console.log(account)
-      }
-    )
+There are two ways to create an account.
+
+1) Pass in `email_verified` property with the value `true`. This is 
+when authentication has been done with a third party service such as
+Mozilla's Persona.
+
+    var validAccount = { 
+      "email": "brock@sintaxi.com",
+      "email_verified": true
+    }
+    
+2) The other option is to pass in `password` and `password_confirmation` 
+properties. When this is the case, email will assume to be unverified.
+
+    var validAccount = { 
+      "email": "brock@sintaxi.com",
+      "email_verified": true
+    }
+
+The set command with either object will create an account.
+
+    rolodex.account.set(validAccount, function(errors, account){
+      console.log(account)
+    })
 
 ### account.get(identifier, callback)
 
-    rolodex.account.get("ojzg-su2w-kqsn",
-      function(account){
-        console.log(account)
-      }
-    )
+    rolodex.account.get("ojzg-su2w-kqsn", function(account){
+      console.log(account)
+    })
 
 The following are possible values for identifier.
 
@@ -88,27 +132,43 @@ The following are possible values for identifier.
   - uuid key value pair (Object). eg `{ uuid: "fdc7af2d-f3c2-4475-bb1c-7a17caed3564"}`  
   - email key value pair (Object). eg `{ email: "hey@man.com"}`  
 
-Eg. (find by params other than id)
+eg. (find by params other than id)
 
-    rolodex.account.get({ "email": "brock@sintaxi" },
-      function(account){
-        console.log(account)
-      }
-    )
+    rolodex.account.get({ "email": "brock@sintaxi" }, function(account){
+      console.log(account)
+    })
+    
+### account.validate([identifier,] object, callback)    
 
-### Account Creation
+Validate is very similar to the set method except that it does not write to the store.
 
-There is two ways to create an account...
+    rolodex.account.validate({}, function(errors, account){
+      console.log(errors)
+    })
 
-1) Provide a password and password\_confirmation along with email. This would
-be for your standard account registration paradigm.
+### account.email(callback)
 
-2) If you are creating the account with a previously verified email you can
-bypass the password requirement by passing in a `{ email_verified: true }`.
-This is suitable when authentication was done via browserid or any other 3rd
-party authentication system that requires an email verification step. If this
-step is chosen, the `email_verified_at` timestamp will be set.
+Emails a user if a record is found in the system
 
+    rolodex.account.email({ "uuid": "fdc7af2d-f3c2-4475-bb1c-7a17caed3564" }, function(errors, message){
+      console.log(message)
+    })
+
+### account.all(callback)
+
+Gets all accounts
+
+    rolodex.account.all(function(accounts){
+      console.log(accounts)
+    })
+    
+### account.group(role, callback)
+
+Returns all records that match that role.
+
+    rolodex.account.group(3, function(accounts){
+      console.log(accounts)
+    })
 
 ## Roles
 

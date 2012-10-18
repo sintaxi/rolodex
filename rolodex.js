@@ -21,7 +21,7 @@ module.exports = function(options) {
   if(options.hasOwnProperty("role") && options["role"] == "slave"){
     // slave
     
-    var up = upnode.connect(options.port)
+    var up = upnode.connect(options.master)
     var port = options.port
     
     var daccount = {
@@ -99,7 +99,7 @@ module.exports = function(options) {
     options.store = options.store || {}
     options.email = options.email || {}
     
-    var client = redis.createClient(options.store.redis)
+    var client = redis.createClient(options.redis)
     
     var account = require("./models/account")({
       client: client,
