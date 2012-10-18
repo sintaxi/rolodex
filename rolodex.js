@@ -3,6 +3,20 @@ var upnode  = require("upnode")
 
 module.exports = function(options) {
   if(!options) options = {}
+  
+  // TODO: improve this feedback message
+  
+  // need role config in production
+  if(!options.hasOwnProperty("role")){
+    throw "<role> required in configuration"
+  }
+  
+  // need email config in production
+  if(process.env.NODE_ENV === "production"){
+    if(!options.hasOwnProperty("email")){
+      throw "<email> required in configuration in production mode."
+    }
+  }
 
   if(options.hasOwnProperty("role") && options["role"] == "slave"){
     // slave
@@ -77,14 +91,6 @@ module.exports = function(options) {
 
     return {
       account: daccount
-      
-      // the SLAVE becomes a MASTER (not yet ready)
-      //
-      // ,listen: function(args){
-      //   upnode({ account: daccount }).listen(args, function(){
-      //     console.log("Rolodex " + options.role + " listening on port", args)
-      //   })
-      // }
     }
 
 
