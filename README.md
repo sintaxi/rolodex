@@ -169,6 +169,14 @@ Returns all records that match that role.
     rolodex.account.group(3, function(accounts){
       console.log(accounts)
     })
+    
+### account.authenticate(identifier, password, callback)
+
+Authenticates the account. If successful, the account will be returned.
+
+    rolodex.account.authenticate({ email: "brock@sintaxi.com" }, "secret", function(errors, account){
+      console.log(account)
+    })
 
 ## Roles
 
