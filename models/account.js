@@ -109,9 +109,8 @@ module.exports = function(config) {
           start = 0
           stop  = -1
         }
-      
         
-        client.zrevrange(namespace + ":collection", start, stop, function(err, reply){
+        client.zrevrange(namespace + ":collection:created_at", start, stop, function(err, reply){
           var total = reply.length
           var count = 0
           var transaction = client.multi()
@@ -182,7 +181,7 @@ module.exports = function(config) {
       .set(namespace + ":email:" + obj.email, obj.id)
       .set(namespace + ":uuid:" + obj.uuid, obj.id)
       .zadd(namespace + ":collection:role", obj.role, obj.id)
-      .zadd(namespace + ":collection", (new Date(obj.created_at).getTime()), obj.id)
+      .zadd(namespace + ":collection:created_at", (new Date(obj.created_at).getTime()), obj.id)
       .exec(function(err, replies){
         if(!err) cb(obj)
       })

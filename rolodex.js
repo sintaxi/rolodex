@@ -103,7 +103,7 @@ module.exports = function(options) {
     return {
       account: account,
       listen: function(args){
-        upnode({ account: account }).listen(args, function(){
+        return upnode({ account: account }).listen(args, function(){
           console.log("Rolodex Master is listening on port", args)
         })
       }

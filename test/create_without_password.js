@@ -1,10 +1,21 @@
 var fs     = require("fs")
 var should = require("should")
 var client = require("redis").createClient()
-var config = JSON.parse(fs.readFileSync(__dirname + "/config.json"))
+
+var role   = process.env.ROLE || "master"
+var Rolodex = require("../rolodex")
+var masterConfig  = JSON.parse(fs.readFileSync(__dirname + "/config/master.json"))
+var slaveConfig   = JSON.parse(fs.readFileSync(__dirname + "/config/slave.json"))
+
+if(role === "slave"){
+  Rolodex(masterConfig).listen(5001)
+  var config = slaveConfig
+}else{
+  var config = masterConfig
+}
 
 describe("create by verified email", function(){
-  var rolodex = require("../rolodex")(config)
+  var rolodex = Rolodex(config)
 
   var validAccountDetails = { 
     "email": "brock@sintaxi.com",
