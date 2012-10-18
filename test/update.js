@@ -3,23 +3,11 @@ var should = require("should")
 var client = require("redis").createClient()
 
 var role   = process.env.ROLE || "master"
-var Rolodex = require("../rolodex")
-var masterConfig  = JSON.parse(fs.readFileSync(__dirname + "/config/master.json"))
-var slaveConfig   = JSON.parse(fs.readFileSync(__dirname + "/config/slave.json"))
+var config  = JSON.parse(fs.readFileSync(__dirname + "/config/"+ role +".json"))
 
 describe("update", function(){
+  var rolodex = require("../")(config)
   
-  var master;
-  if(role === "slave"){
-    master = Rolodex(masterConfig).listen(5001)
-    var config = slaveConfig
-  }else{
-    var config = masterConfig
-  }
-  
-  //console.log(master)
-  
-  var rolodex = Rolodex(config)
   var account_id
   before(function(done){
     var validAccountDetails = { 
@@ -56,8 +44,6 @@ describe("update", function(){
   })
 
   after(function(){
-    master.end()
-    master.close()
     client.flushall()
     client.quit()
   })
