@@ -11,7 +11,7 @@ describe("update", function(){
   var account_id
   before(function(done){
     var validAccountDetails = { 
-      "email": "brock@sintaxi.com",
+      "email": "brock+hey@sintaxi.com",
       "email_verified": true
     }
     rolodex.account.set(validAccountDetails, function(errors, account){
@@ -21,7 +21,7 @@ describe("update", function(){
   })
 
   it("should be able to change email", function(done) {
-    rolodex.account.set({ email: "brock@sintaxi.com" } , { "email": "fred@sintaxi.com" }, function(errors, account){
+    rolodex.account.set({ email: "brock+hey@sintaxi.com" } , { "email": "fred@sintaxi.com" }, function(errors, account){
       account.should.have.property("id", account_id)
       account.should.have.property("email", "fred@sintaxi.com")
       account.should.have.property("uuid")
@@ -32,10 +32,10 @@ describe("update", function(){
   })
 
   it("should free up unused email", function(done) {
-    var accountParams = { "email": "brock@sintaxi.com", "email_verified": true }
+    var accountParams = { "email": "brock+hey@sintaxi.com", "email_verified": true }
     rolodex.account.set(accountParams, function(errors, account){
       account.should.have.property("id")
-      account.should.have.property("email", "brock@sintaxi.com")
+      account.should.have.property("email", "brock+hey@sintaxi.com")
       account.should.have.property("uuid")
       account.should.have.property("created_at")
       account.should.have.property("updated_at")

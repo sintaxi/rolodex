@@ -12,7 +12,7 @@ describe("get", function(){
   var account_id, uuid
   before(function(done){
     var validAccountDetails = { 
-      "email": "brock@sintaxi.com",
+      "email": "brock+baz@sintaxi.com",
       "email_verified": true
     }
 
@@ -26,7 +26,7 @@ describe("get", function(){
   it("should get by id", function(done) {
     rolodex.account.get(account_id, function(account){
       account.should.have.property("id", account_id)
-      account.should.have.property("email", "brock@sintaxi.com")
+      account.should.have.property("email", "brock+baz@sintaxi.com")
       account.should.have.property("uuid")
       account.should.have.property("created_at")
       account.should.have.property("updated_at")
@@ -38,9 +38,9 @@ describe("get", function(){
   })
 
   it("should get by email", function(done) {
-    rolodex.account.get({ email: "brock@sintaxi.com" }, function(account){
+    rolodex.account.get({ email: "brock+baz@sintaxi.com" }, function(account){
       account.should.have.property("id", account_id)
-      account.should.have.property("email", "brock@sintaxi.com")
+      account.should.have.property("email", "brock+baz@sintaxi.com")
       account.should.have.property("uuid")
       account.should.have.property("created_at")
       account.should.have.property("updated_at")
@@ -54,7 +54,7 @@ describe("get", function(){
   it("should get by UUID", function(done) {
     rolodex.account.get({ uuid: uuid }, function(account){
       account.should.have.property("id", account_id)
-      account.should.have.property("email", "brock@sintaxi.com")
+      account.should.have.property("email", "brock+baz@sintaxi.com")
       account.should.have.property("created_at")
       account.should.have.property("updated_at")
       done()
