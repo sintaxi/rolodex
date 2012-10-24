@@ -1,5 +1,5 @@
 var redis   = require("redis")
-var upnode  = require("upnode")
+var request  = require("request")
 
 module.exports = function(options) {
   if(!options) options = {}
@@ -21,78 +21,40 @@ module.exports = function(options) {
   if(options.hasOwnProperty("role") && options["role"] == "slave"){
     // slave
     
-    var up = upnode.connect(options.master)
-    var port = options.port
-    
-    var daccount = {
-      set: function(){
-        var args = Array.prototype.slice.call(arguments);
-        up(function(rolodex){
-          rolodex.account.set.apply(rolodex.account, args)
-        })
-      },
-      
-      get: function(){
-        var args = Array.prototype.slice.call(arguments);
-        up(function(rolodex){
-          rolodex.account.get.apply(rolodex.account, args)
-        })
-      },
-      
-      validate: function(){
-        var args = Array.prototype.slice.call(arguments);
-        up(function(rolodex){
-          rolodex.account.validate.apply(rolodex.account, args)
-        })
-      },
-      
-      authenticate: function(){
-        var args = Array.prototype.slice.call(arguments);
-        up(function(rolodex){
-          rolodex.account.authenticate.apply(rolodex.account, args)
-        })
-      },
-      
-      group: function(){
-        var args = Array.prototype.slice.call(arguments);
-        up(function(rolodex){
-          rolodex.account.group.apply(rolodex.account, args)
-        })
-      },
-      
-      all: function(){
-        var args = Array.prototype.slice.call(arguments);
-        up(function(rolodex){
-          rolodex.account.all.apply(rolodex.account, args)
-        })
-      },
-      
-      email: function(){
-        var args = Array.prototype.slice.call(arguments);
-        // this is a mess
-        if(options.hasOwnProperty("email")){
-          if(options.email.hasOwnProperty("postmark")){
-            args[1]["postmark"] = options.email.postmark
-          } 
-          if(options.email.hasOwnProperty("defaults")){
-            if(!args[1].hasOwnProperty("from") && options.email.defaults.hasOwnProperty("from")){
-              args[1]["from"] = options.email.defaults.from
-            }
-            if(!args[1].hasOwnProperty("reply_to") && options.email.defaults.hasOwnProperty("reply_to")){
-              args[1]["reply_to"] = options.email.defaults.reply_to
-            }
+    var remote = function(endpoint){
+      var endpoint = endpoint;
+      return function(){
+        var args = Array.prototype.slice.call(arguments)
+        var callback = args.pop()  
+        var ops = {
+          "method"  : "POST",
+          "url"     : options.master + endpoint,
+          "body"    : JSON.stringify(args),
+          "headers" : {
+            "Accept"                  : "application/json",
+            "Content-Type"            : "application/json"
           }
         }
-        up(function(rolodex){
-          rolodex.account.email.apply(rolodex.account, args)
+        request(ops, function(e, r, b){
+          var reply = JSON.parse(b)
+          if(r.statusCode == 200){
+            callback.apply(this, reply)
+          }
         })
       }
     }
-
+    
     return {
-      account: daccount
+      account: {
+        set:          remote("/account/set"),
+        get:          remote("/account/get"),
+        validate:     remote("/account/validate"),
+        authenticate: remote("/account/authenticate"),
+        group:        remote("/account/group"),
+        all:          remote("/account/all"),
+        email:        remote("/account/email")
+      }
     }
-
 
   }else{
     // master
@@ -109,7 +71,25 @@ module.exports = function(options) {
     return {
       account: account,
       listen: function(args){
-        return upnode({ account: account }).listen(args, function(){
+        var connect = require('connect')
+        var http    = require('http')
+        var app = connect()
+          .use(connect.bodyParser())
+          .use(function(req, rsp, next){
+            var a = req.url.split("/")
+            req.rolodexMethod = a.pop()
+            req.namespace     = a.pop()
+            next()
+          })
+          .use(function(req, rsp){
+            var args = req.body
+            args.push(function(){
+              rsp.end(JSON.stringify(Array.prototype.slice.call(arguments)))
+            })
+            account[req.rolodexMethod].apply(this, args)
+          })
+          
+        http.createServer(app).listen(args, function(){
           console.log("Rolodex Master is listening on port", args)
         })
       }
