@@ -17,7 +17,9 @@ module.exports = function(options) {
       throw "<email> required in configuration in production mode."
     }
   }
-
+  
+  var rolodex = {}
+  
   if(options.hasOwnProperty("role") && options["role"] == "slave"){
     // slave
     
@@ -44,18 +46,16 @@ module.exports = function(options) {
       }
     }
     
-    return {
-      account: {
-        set:          remote("/account/set"),
-        get:          remote("/account/get"),
-        validate:     remote("/account/validate"),
-        authenticate: remote("/account/authenticate"),
-        group:        remote("/account/group"),
-        all:          remote("/account/all"),
-        email:        remote("/account/email")
-      }
+    rolodex.account = {
+      set:          remote("/account/set"),
+      get:          remote("/account/get"),
+      validate:     remote("/account/validate"),
+      authenticate: remote("/account/authenticate"),
+      group:        remote("/account/group"),
+      all:          remote("/account/all"),
+      email:        remote("/account/email")
     }
-
+    
   }else{
     // master
     options.store = options.store || {}
@@ -63,38 +63,34 @@ module.exports = function(options) {
     
     var client = redis.createClient(options.redis)
     
-    var account = require("./models/account")({
+    rolodex.account = require("./models/account")({
       client: client,
       email : options.email
     })
     
-    return {
-      account: account,
-      listen: function(args){
-        var connect = require('connect')
-        var http    = require('http')
-        var app = connect()
-          .use(connect.bodyParser())
-          .use(function(req, rsp, next){
-            var a = req.url.split("/")
-            req.rolodexMethod = a.pop()
-            req.namespace     = a.pop()
-            next()
-          })
-          .use(function(req, rsp){
-            var args = req.body
-            args.push(function(){
-              rsp.end(JSON.stringify(Array.prototype.slice.call(arguments)))
-            })
-            account[req.rolodexMethod].apply(this, args)
-          })
-          
-        http.createServer(app).listen(args, function(){
-          console.log("Rolodex Master is listening on port", args)
+    rolodex.listen = function(args){
+      var connect = require('connect')
+      var http    = require('http')
+      var app = connect()
+        .use(connect.bodyParser())
+        .use(function(req, rsp, next){
+          var a = req.url.split("/")
+          req.rolodexMethod     = a.pop()
+          req.roloxexNamespace  = a.pop()
+          next()
         })
-      }
+        .use(function(req, rsp){
+          var args = req.body
+          args.push(function(){
+            rsp.end(JSON.stringify(Array.prototype.slice.call(arguments)))
+          })
+          rolodex[req.roloxexNamespace][req.rolodexMethod].apply(this, args)
+        })
+      http.createServer(app).listen(args, function(){
+        console.log("Rolodex Master is listening on port", args)
+      })
     }
-    
-    
   }
+  
+  return rolodex
 }
