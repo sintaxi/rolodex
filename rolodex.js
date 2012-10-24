@@ -38,9 +38,11 @@ module.exports = function(options) {
           }
         }
         request(ops, function(e, r, b){
-          var reply = JSON.parse(b)
           if(r.statusCode == 200){
+            var reply = JSON.parse(b)
             callback.apply(this, reply)
+          }else{
+            callback.call()
           }
         })
       }
@@ -60,7 +62,10 @@ module.exports = function(options) {
     // master
     options.store = options.store || {}
     options.email = options.email || {}
-    
+    options.auth  = options.auth  || {
+      user: "default",
+      pass: "secret"
+    }
     var client = redis.createClient(options.redis)
     
     rolodex.account = require("./models/account")({
@@ -72,6 +77,7 @@ module.exports = function(options) {
       var connect = require('connect')
       var http    = require('http')
       var app = connect()
+        .use(connect.basicAuth(options.auth.user, options.auth.pass))
         .use(connect.bodyParser())
         .use(function(req, rsp, next){
           var a = req.url.split("/")
@@ -86,9 +92,7 @@ module.exports = function(options) {
           })
           rolodex[req.roloxexNamespace][req.rolodexMethod].apply(this, args)
         })
-      http.createServer(app).listen(args, function(){
-        console.log("Rolodex Master is listening on port", args)
-      })
+      http.createServer(app).listen(args)
     }
   }
   
