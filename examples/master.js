@@ -1,4 +1,4 @@
-var listen  = process.env.LISTEN  || 5001
+var port  = process.env.PORT || 5001
 
 var rolodex = require("../")({
   "role": "master",
@@ -14,4 +14,6 @@ var rolodex = require("../")({
   }
 })
 
-rolodex.listen(listen)
+rolodex.listen(port, function(){
+  console.log("listening on port", port)
+})

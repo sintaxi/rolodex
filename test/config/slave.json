@@ -1,4 +1,4 @@
 {
   "role": "slave",
-  "master": "http://foo:bar@127.0.0.1:5001"
+  "master": "http://foo:baz@127.0.0.1:5002"
 }

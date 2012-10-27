@@ -58,6 +58,32 @@ module.exports = function(options) {
       email:        remote("/account/email")
     }
     
+    rolodex.listen = function(){
+      var connect = require('connect')
+      var http    = require('http')
+      var app = connect()
+        .use(connect.basicAuth(options.auth.user, options.auth.pass))
+        .use(connect.bodyParser())
+        .use(function(req, rsp){
+          var ops = {
+            "method"  : "POST",
+            "url"     : options.master + req.url,
+            "body"    : JSON.stringify(req.body),
+            "headers" : {
+              "Accept"                  : "application/json",
+              "Content-Type"            : "application/json"
+            }
+          }
+          request(ops, function(e, r, b){
+            if(r.statusCode == 200){
+              rsp.end(b)
+            }
+          })
+        })
+      var server = http.createServer(app)
+      server.listen.apply(server, arguments)
+    }
+    
   }else{
     // master
     options.store = options.store || {}
@@ -73,7 +99,8 @@ module.exports = function(options) {
       email : options.email
     })
     
-    rolodex.listen = function(args){
+    rolodex.listen = function(){
+      var ar = arguments
       var connect = require('connect')
       var http    = require('http')
       var app = connect()
@@ -92,7 +119,8 @@ module.exports = function(options) {
           })
           rolodex[req.roloxexNamespace][req.rolodexMethod].apply(this, args)
         })
-      http.createServer(app).listen(args)
+      var server = http.createServer(app)
+      server.listen.apply(server, arguments)
     }
   }
   
