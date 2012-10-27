@@ -151,6 +151,7 @@ module.exports = function(config) {
             // dont let role be lower than 5
             if(replies.record.role < 0 || replies.record.role > 5) replies.record.role = 5
             
+            
             if(replies.record.role < replies.promoter.role){
               cb({ messages: ["role cannot be higher than promoter"], details: { role: "cannot be higher than promoter" }})
             }else{
