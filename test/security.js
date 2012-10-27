@@ -25,6 +25,20 @@ describe("security", function(){
       done()
     })
   })
+  
+  it("should not be able to set role", function(done) {
+    rolodex.account.set({ email: "someguy@sintaxi.com", "email_verified": true, "role": 3}, function(errors, account){
+      account.should.have.property("role", 5)
+      done()
+    })
+  })
+  
+  it("should not be able to update role", function(done) {
+    rolodex.account.set({ email: "someguy@sintaxi.com" }, { "role": 3 }, function(errors, account){
+      account.should.have.property("role", 5)
+      done()
+    })
+  })
 
   it("should not be able to change uuid", function(done) {
     rolodex.account.set({ email: "brock@sintaxi.com"}, { "uuid": "12345" }, function(errors, account){
