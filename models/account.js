@@ -137,6 +137,53 @@ module.exports = function(config) {
             cb(errors, reply)
           })
         })
+      },
+      
+
+      promote: function(identifier, role, promoter, cb){
+        var that = this;
+        var replies = {}
+
+        var callback = function(){
+          if(replies.record && replies.promoter){
+            replies.record.role = parseInt(role)
+
+            // dont let role be lower than 5
+            if(replies.record.role < 0 || replies.record.role > 5) replies.record.role = 5
+            
+            if(replies.record.role < replies.promoter.role){
+              cb({ messages: ["role cannot be higher than promoter"], details: { role: "cannot be higher than promoter" }})
+            }else{
+              that.locals.client.hset("account:" + replies.record.id, "role", replies.record.role, function(err, reply){
+                that.out(replies.record, function(record){
+                  cb(null, record)
+                })
+              })              
+            }
+          }else{
+            var errors = { messages: [], details: {}}
+            if(!replies.record){
+              errors.messages.push("account must exist")
+              errors.details["account"] = "must exist"              
+            }
+            if(!replies.promoter){
+              errors.messages.push("promoter must exist")
+              errors.details["promoter"] = "must exist"              
+            }
+            cb(errors)
+          }
+        }
+        
+        that.read(identifier, function(record){
+          replies["record"] = record;
+          if(replies.hasOwnProperty("promoter")) callback()
+        })
+        
+        that.read(promoter, function(promoter){
+          replies["promoter"] = promoter;
+          if(replies.hasOwnProperty("record")) callback()
+        })
+        
       }
       
     }
