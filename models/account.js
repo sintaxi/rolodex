@@ -138,51 +138,103 @@ module.exports = function(config) {
           })
         })
       },
-      
 
-      promote: function(identifier, role, promoter, cb){
-        var that = this;
-        var replies = {}
-
-        var callback = function(){
-          if(replies.record && replies.promoter){
-            replies.record.role = parseInt(role)
-
-            // dont let role be lower than 5
-            if(replies.record.role < 0 || replies.record.role > 5) replies.record.role = 5
-            
-            
-            if(replies.record.role < replies.promoter.role){
-              cb({ messages: ["role cannot be higher than promoter"], details: { role: "cannot be higher than promoter" }})
-            }else{
-              that.locals.client.hset("account:" + replies.record.id, "role", replies.record.role, function(err, reply){
-                that.out(replies.record, function(record){
-                  cb(null, record)
-                })
-              })              
-            }
-          }else{
-            var errors = { messages: [], details: {}}
-            if(!replies.record){
-              errors.messages.push("account must exist")
-              errors.details["account"] = "must exist"              
-            }
-            if(!replies.promoter){
-              errors.messages.push("promoter must exist")
-              errors.details["promoter"] = "must exist"              
-            }
-            cb(errors)
-          }
+      promote: function(identifier, role, promoter, callback){
+        if(role == null) role = 5
+        
+        //////////////
+        // filters
+        //////////////
+        
+        var fetchRecord = function(obj, next){
+          this.locals.account.get(obj.account, function(record){
+            obj["account"] = record;
+            next(obj)
+          })          
         }
         
-        that.read(identifier, function(record){
-          replies["record"] = record;
-          if(replies.hasOwnProperty("promoter")) callback()
+        var fetchPromoter = function(obj, next){
+          this.locals.account.get(obj.promoter, function(record){
+            obj["promoter"] = record;
+            next(obj)
+          })          
+        }
+        
+        var fixRole = function(obj, next){          
+          obj.role = parseInt(obj.role)
+          
+          if(obj.role < 0 || obj.role > 5)
+            obj.role = 5
+          
+          next(obj)
+        }
+        
+        //////////////
+        // validations
+        //////////////
+        
+        var mustExist = function(field, obj, errors, next){
+          if(obj[field] == null) errors.push("must exist")
+          next()
+        }
+        
+        var mustBeHighEnough = function(field, obj, errors, next){
+          if(obj.account != null && obj.promoter != null){
+            if(obj.account.role < obj.promoter.role){
+              errors.push("does not have high enough role")
+            }
+          }
+          next()
+        }
+        
+        var cantBeSelf = function(field, obj, errors, next){
+          if(obj.role != null && obj.promoter != null){
+            if(obj.account.id == obj.promoter.id){
+              errors.push("cannot be same as account")
+            }            
+          }
+          next()
+        }
+        
+        var cantBeHigher = function(field, obj, errors, next){
+          if(obj.role != null && obj.promoter != null){
+            if(obj.role < obj.promoter.role){
+              errors.push("cannot be higher than promoter")
+            }            
+          }
+          next()
+        }
+        
+        var upgrader = new Thug({
+          "locals": { 
+            "client": this.locals.client,
+            "account": this
+          },
+          "filters":{
+            "in": [fetchRecord, fetchPromoter, fixRole]
+          },
+          "validations": {
+            "account": [mustExist],
+            "promoter": [mustExist, cantBeSelf, mustBeHighEnough],
+            "role": [mustExist, cantBeHigher]
+          }
         })
         
-        that.read(promoter, function(promoter){
-          replies["promoter"] = promoter;
-          if(replies.hasOwnProperty("record")) callback()
+        // setup write
+        upgrader.constructor.prototype.write = function(identifier, obj, cb){
+          obj.account.role = obj.role
+          this.locals.client.hset("account:" + obj.account.id, "role", obj.account.role, function(err, reply){
+            if(!err) cb(obj.account)
+          })
+        }
+        
+        // return errors or account
+        upgrader.set({ account: identifier, role: role, promoter: promoter }, function(errors, record){
+          if(errors){
+            callback(errors)
+          }else{
+            callback(null, record)
+          }
         })
         
       }
