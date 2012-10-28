@@ -3,6 +3,39 @@ var filters     = require("../lib/filters")
 var validations = require("../lib/validations")
 var hash        = require("../lib/hash")
 
+// admin filters
+
+var fetchAccount = function(obj, next){
+  this.locals.account.get(obj.account, function(record){
+    obj["account"] = record;
+    next(obj)
+  })          
+}
+
+var fetchPromoter = function(obj, next){
+  this.locals.account.get(obj.promoter, function(record){
+    obj["promoter"] = record;
+    next(obj)
+  })          
+}
+
+// admin validations
+
+var mustExist = function(field, obj, errors, next){
+  if(obj[field] == null) errors.push("must exist")
+  next()
+}
+
+var cantBeSelf = function(field, obj, errors, next){
+  if(obj.role != null && obj.promoter != null){
+    if(obj.account.id == obj.promoter.id){
+      errors.push("cannot be same as account")
+    }            
+  }
+  next()
+}
+
+
 module.exports = function(config) {
   config       = config || {}
   config.email = config.email || {}
@@ -146,26 +179,10 @@ module.exports = function(config) {
         // filters
         //////////////
         
-        var fetchRecord = function(obj, next){
-          this.locals.account.get(obj.account, function(record){
-            obj["account"] = record;
-            next(obj)
-          })          
-        }
-        
-        var fetchPromoter = function(obj, next){
-          this.locals.account.get(obj.promoter, function(record){
-            obj["promoter"] = record;
-            next(obj)
-          })          
-        }
-        
         var fixRole = function(obj, next){          
           obj.role = parseInt(obj.role)
-          
           if(obj.role < 0 || obj.role > 5)
             obj.role = 5
-          
           next(obj)
         }
         
@@ -173,25 +190,11 @@ module.exports = function(config) {
         // validations
         //////////////
         
-        var mustExist = function(field, obj, errors, next){
-          if(obj[field] == null) errors.push("must exist")
-          next()
-        }
-        
         var mustBeHighEnough = function(field, obj, errors, next){
           if(obj.account != null && obj.promoter != null){
             if(obj.account.role < obj.promoter.role){
               errors.push("does not have high enough role")
             }
-          }
-          next()
-        }
-        
-        var cantBeSelf = function(field, obj, errors, next){
-          if(obj.role != null && obj.promoter != null){
-            if(obj.account.id == obj.promoter.id){
-              errors.push("cannot be same as account")
-            }            
           }
           next()
         }
@@ -211,7 +214,7 @@ module.exports = function(config) {
             "account": this
           },
           "filters":{
-            "in": [fetchRecord, fetchPromoter, fixRole]
+            "in": [fetchAccount, fetchPromoter, fixRole]
           },
           "validations": {
             "account": [mustExist],
@@ -229,10 +232,34 @@ module.exports = function(config) {
         }
         
         // return errors or account
+        var self = this;
         upgrader.set({ account: identifier, role: role, promoter: promoter }, function(errors, record){
           if(errors){
-            callback(errors)
+            // upgrading own account
+            if( errors["details"]["promoter"] && errors["details"]["role"] && 
+                errors["details"]["promoter"] == "cannot be same as account" &&
+                errors["details"]["role"] == "cannot be higher than promoter"){
+                // self upgrade attempt. check to see if they are the only account
+                self.all(function(accounts){
+                  if(accounts.length == 1){
+                    self.get(identifier, function(a){
+                      // only account. upgrade it as requested
+                      a.role = role
+                      self.locals.client.hset("account:" + a.id, "role", a.role, function(err, reply){
+                        if(!err) callback(null, a)
+                      })                      
+                    })
+                  }else{
+                    // not only account. throw errors as usual
+                    callback(errors)
+                  }
+                })
+            }else{
+              // not self upgrade attempt
+              callback(errors)
+            }
           }else{
+            // success
             callback(null, record)
           }
         })

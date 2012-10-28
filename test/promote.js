@@ -55,7 +55,7 @@ describe("promote", function(){
       done()
     })
   })
-
+  
   it("should be able to promote someone", function(done) {
     rolodex.account.promote({ "email": "dave@sintaxi.com" }, 3, { "email": "brock@sintaxi.com" }, function(errors, account){
       account.should.have.property("role", 3)
@@ -69,7 +69,7 @@ describe("promote", function(){
       done()
     })
   })
-
+  
   it("should not allow self promotion", function(done) {
     rolodex.account.promote({ "email": "dave@sintaxi.com" }, 4, { "email": "dave@sintaxi.com" }, function(errors, account){
       errors.details.should.have.property("promoter", "cannot be same as account")
@@ -77,12 +77,13 @@ describe("promote", function(){
     })
   })
   
-  // it("can promote self to owner if no owner set", function(done) {
-  //   rolodex.account.promote({ "email": "brock@sintaxi.com" }, 0, { "email": "brock@sintaxi.com" }, function(errors, account){
-  //     account.should.have.property("role", 0)
-  //     done()
-  //   })
-  // })
+  it("cant promote self to owner more than one acount in system", function(done) {
+    rolodex.account.promote({ "email": "brock@sintaxi.com" }, 0, { "email": "brock@sintaxi.com" }, function(errors, account){
+      errors.details.should.have.property("promoter", "cannot be same as account")
+      errors.details.should.have.property("role", "cannot be higher than promoter")
+      done()
+    })
+  })
 
   after(function(){
     client.flushall()
