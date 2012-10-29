@@ -145,22 +145,27 @@ module.exports = function(config) {
         
         client.zrevrange(namespace + ":collection:created_at", start, stop, function(err, reply){
           var total = reply.length
-          var count = 0
-          var transaction = client.multi()
-          reply.forEach(function(id){
-            transaction.hgetall(namespace + ":" + id)
-          })
-          transaction.exec(function(err, replies){
-            replies.forEach(function(obj){
-              that.out(obj, function(record){
-                count++
-                if(count == total){
-                  cb(replies)
-                } 
-              })
+          if(total === 0){
+            cb([]) 
+          }else{
+            var count = 0
+            var transaction = client.multi()
+            reply.forEach(function(id){
+              transaction.hgetall(namespace + ":" + id)
             })
-          })
+            transaction.exec(function(err, replies){
+              replies.forEach(function(obj){
+                that.out(obj, function(record){
+                  count++
+                  if(count == total){
+                    cb(replies)
+                  } 
+                })
+              })
+            }) 
+          }
         })
+        
       },
       
       email: function(identifier, msg, cb){
@@ -336,6 +341,22 @@ module.exports = function(config) {
       .exec(function(err, replies){
         if(!err) cb(obj)
       })
+    })
+  }
+  
+  // Remove the Record
+  // - must fire callback with errors or the record
+  account.constructor.prototype.remove = function(identifier, record, callback){
+    var namespace = this.locals.namespace
+    var client    = this.locals.client
+    client.multi()
+    .del(namespace + ":" + record.id)
+    .del(namespace + ":email:" + record.email)
+    .del(namespace + ":uuid:" + record.uuid)
+    .zrem(namespace + ":collection:role", record.id)
+    .zrem(namespace + ":collection:created_at", record.id)
+    .exec(function(err, replies){
+      if(!err) callback(null)
     })
   }
 

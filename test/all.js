@@ -19,7 +19,6 @@ describe("all", function(){
         }
       })
     })(i)
-
   })
 
   it("should get all elements with zero args", function(done) {
