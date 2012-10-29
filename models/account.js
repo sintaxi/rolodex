@@ -175,6 +175,26 @@ module.exports = function(config) {
       promote: function(identifier, role, promoter, callback){
         if(role == null) role = 5
         
+        var that = this
+        
+        // helper function for upgrading role
+        var upgradeRole = function(id, role, callback){
+          var namespace = that.locals.namespace
+          var client    = that.locals.client
+          var key = namespace + ":" + id
+          client.multi()
+          .hset(key, "role", role)
+          .zadd(namespace + ":collection:role", role, id)
+          .exec(function(err, replies){
+            if(!err) callback(true)
+          })
+                    
+          // obj.account.role = obj.role
+          // this.locals.client.hset("account:" + id, "role", role, function(err, reply){
+          //   if(!err) callback()
+          // })
+        }
+        
         //////////////
         // filters
         //////////////
@@ -226,9 +246,13 @@ module.exports = function(config) {
         // setup write
         upgrader.constructor.prototype.write = function(identifier, obj, cb){
           obj.account.role = obj.role
-          this.locals.client.hset("account:" + obj.account.id, "role", obj.account.role, function(err, reply){
-            if(!err) cb(obj.account)
+          upgradeRole(obj.account.id, obj.role, function(reply){
+            cb(obj.account)
           })
+          // obj.account.role = obj.role
+          // this.locals.client.hset("account:" + obj.account.id, "role", obj.account.role, function(err, reply){
+          //   if(!err) cb(obj.account)
+          // })
         }
         
         // return errors or account

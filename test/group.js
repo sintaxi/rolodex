@@ -10,16 +10,25 @@ describe("group", function(){
   
   var total = 500
   before(function(done){
-    var count = 0
-    for(var i = 1; i <= total; i++)(function(i){
-      var role = Math.floor(Math.random() * 6)
-      rolodex.account.set({ "email": "user"+ i +"@sintaxi.com", "role": role, "email_verified": true }, function(errors, account){
-        count++
-        if(count == total){
-          done()
-        }
+    rolodex.account.set({ "email": "owner@sintaxi.com", "email_verified": true }, function(errors, account){
+      var owner = account.id
+      rolodex.account.promote(owner, 0, owner, function(errors, account){
+        var count = 0
+        for(var i = 1; i <= total; i++)(function(i){
+          var role = Math.floor(Math.random() * 6)
+          var email = "user"+ i +"@sintaxi.com"
+          rolodex.account.set({ "email": email, "email_verified": true }, function(errors, account){
+            rolodex.account.promote({ "email": email }, role, owner, function(errors, account){
+              count++
+              if(count == total){
+                done()
+              }
+            })
+          })
+        })(i)
       })
-    })(i)
+    })
+
   })
 
   it("should get all group 0 accounts", function(done) {
@@ -39,6 +48,7 @@ describe("group", function(){
     })
   })
 
+  
   it("should get all group 1 accounts", function(done) {
     rolodex.account.group(1, function(accounts){
       accounts.should.be.an.instanceof(Array)

@@ -55,7 +55,8 @@ module.exports = function(options) {
       authenticate: remote("/account/authenticate"),
       group:        remote("/account/group"),
       all:          remote("/account/all"),
-      email:        remote("/account/email")
+      email:        remote("/account/email"),
+      promote:      remote("/account/promote")
     }
     
     rolodex.listen = function(){
