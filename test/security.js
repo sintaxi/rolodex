@@ -26,6 +26,13 @@ describe("security", function(){
     })
   })
   
+  it("should not take arbitrary values id", function(done) {
+    rolodex.account.set({ email: "brock@sintaxi.com"}, { id: "567", foo: "bar" }, function(errors, account){
+      account.should.not.have.property("foo")
+      done()
+    })
+  })
+  
   it("should not be able to set role", function(done) {
     rolodex.account.set({ email: "someguy@sintaxi.com", "email_verified": true, "role": 3}, function(errors, account){
       account.should.have.property("role", 5)

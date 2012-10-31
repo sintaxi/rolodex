@@ -49,7 +49,8 @@ module.exports = function(config) {
     },
     "filters": {
       "in": [
-        filters.blacklist
+        filters.blacklist,
+        filters.whitelist
       ],
       "beforeValidate": [
         filters.id,
