@@ -10,5 +10,6 @@ var rolodex = require("../")({
 })
 
 rolodex.listen(port + 1, function(){
+  console.log("connecting to port", port)
   console.log("listening on port", port + 1)
 })

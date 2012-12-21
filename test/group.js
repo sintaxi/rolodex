@@ -8,7 +8,7 @@ var config  = JSON.parse(fs.readFileSync(__dirname + "/config/"+ role +".json"))
 describe("group", function(){
   var rolodex = require("../")(config)
   
-  var total = 500
+  var total = 50
   before(function(done){
     rolodex.account.set({ "email": "owner@sintaxi.com", "email_verified": true }, function(errors, account){
       var owner = account.id

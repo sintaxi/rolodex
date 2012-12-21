@@ -8,7 +8,7 @@ var config  = JSON.parse(fs.readFileSync(__dirname + "/config/"+ role +".json"))
 describe("all", function(){
   var rolodex = require("../")(config)
 
-  var total = 100
+  var total = 10
   before(function(done){
     var count = 0
     for(var i = 1; i <= total; i++)(function(i){
