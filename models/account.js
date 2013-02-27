@@ -49,7 +49,6 @@ module.exports = function(config) {
     },
     "filters": {
       "in": [
-        filters.blacklist,
         filters.whitelist
       ],
       "beforeValidate": [
@@ -69,8 +68,22 @@ module.exports = function(config) {
       ]
     },
     "validations": {
-      "email"         : [validations.present, validations.email, validations.unique, validations.verifiedEmail],
-      "password"      : [validations.presentPassword, validations.confirmation]
+      "first_name": [
+        validations.name
+      ],
+      "last_name": [
+        validations.name
+      ],
+      "email": [
+        validations.present,
+        validations.email,
+        validations.unique,
+        validations.verifiedEmail
+      ],
+      "password": [
+        validations.presentPassword,
+        validations.confirmation
+      ]
     },
     "methods": {
       authenticate: function(q, password, cb){
