@@ -104,7 +104,6 @@ module.exports = function(options) {
     rolodex.listen = function(){
       var ar = arguments
       var connect = require('connect')
-      var http    = require('http')
       var app = connect()
         .use(connect.basicAuth(options.auth.user, options.auth.pass))
         .use(connect.bodyParser())
@@ -121,7 +120,34 @@ module.exports = function(options) {
           })
           rolodex[req.roloxexNamespace][req.rolodexMethod].apply(this, args)
         })
-      var server = http.createServer(app)
+
+      if(options.hasOwnProperty("ssl")) {
+
+        var fs = require('fs')
+        var https = require('https')
+
+        if(!options.ssl.hasOwnProperty("cert")) {
+          throw "<ssl.cert> required in configuration when using ssl"
+        }
+        if(!options.ssl.hasOwnProperty("key")) {
+          throw "<ssl.key> required in configuration when using ssl"
+        }
+
+        var privateKey = fs.readFileSync(options.ssl.key, 'utf-8')
+        var certificate = fs.readFileSync(options.ssl.cert, 'utf-8')
+
+        var server = https.createServer({
+          "key": privateKey,
+          "cert": certificate
+        }, app)
+      } 
+
+      else {
+
+        var http = require('http')
+        var server = http.createServer(app)
+      }
+
       server.listen.apply(server, arguments)
     }
   }
