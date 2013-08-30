@@ -5,10 +5,10 @@
   "author": "Brock Whitten <brock@sintaxi.com>",
   "keywords": ["redis", "account management", "users", "authentication"],
   "main": "./rolodex.js",
-  "scripts": { 
+  "scripts": {
     "test": "./node_modules/.bin/mocha -t 10000"
   },
-  "repository": { 
+  "repository": {
     "type": "git",
     "url": "https://github.com/sintaxi/node-rolodex.git"
   },
@@ -16,7 +16,7 @@
     "redis": "0.7.2",
     "connect": "2.6.0",
     "request": "2.11.4",
-    "bcrypt": "0.7.2",
+    "bcrypt": "0.7.6",
     "node-uuid": "1.3.1",
     "validator": "0.2.8",
     "thug": "0.4.2"
@@ -27,7 +27,7 @@
   },
   "engines": { "node": "*" },
   "licenses" : [
-    { 
+    {
       "type" : "MIT",
       "url" : "https://raw.github.com/sintaxi/node-rolodex/master/README.md"
     }
