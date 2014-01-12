@@ -42,6 +42,15 @@ describe("token", function(){
     })
   })
 
+  it("should require auth and give token", function(done) {
+    rolodex.account.authtoken(tk, function(errors, token){
+      should.not.exist(errors)
+      should.exist(token)
+      token.should.be.type('string')
+      done()
+    })
+  })
+
   after(function(){
     client.flushall()
     client.quit()

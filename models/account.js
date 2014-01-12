@@ -1,3 +1,4 @@
+var crypto      = require("crypto")
 var Thug        = require("thug")
 var filters     = require("../lib/filters")
 var validations = require("../lib/validations")
@@ -87,19 +88,39 @@ module.exports = function(config) {
     },
     "methods": {
 
+      authtoken: function(q, password, callback){
+        var namespace = this.locals.namespace
+        var client    = this.locals.client
+        var that      = this
+
+        if(!callback){
+          callback = password
+          that.authenticate(q, function(err, acct){
+            if(err) return callback(err)
+            that.token(acct.id, callback)
+          })
+        }else{
+          that.authenticate(q, password, function(err, acct){
+            that.token(acct.id, callback)
+          })
+        }
+      },
+
       // generates token (non-authenticating)
       token: function(q, callback){
         var namespace = this.locals.namespace
         var client    = this.locals.client
         var that      = this
-        that.get(q, function(account){
-          if (!account) return callback(err, null)
-          var t = "foobar"
-          client.set("token:" + t, account.id, function(err){
+        that.get(q, function(acct){
+          if (!account) return callback({
+            details: {"token": "is not valid"},
+            messages: ["token is not valid"]
+          })
+          var t = crypto.randomBytes(16).toString('hex')
+          client.set("token:" + t, acct.id, function(err){
             callback(null, t)
           })
         })
-
       },
 
       authenticate: function(q, password, cb){
