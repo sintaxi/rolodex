@@ -1,5 +1,6 @@
 {
   "role": "master",
+  "auth": { "user": "foo", "password": "bar" },
   "email": {
     "postmark": "dc2d8c68-771e-4d6f-95b8-1103e1bd57fc",
     "defaults": {
