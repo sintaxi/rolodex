@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "mocha": "0.10.2",
-    "should": "0.5.1"
+    "should": "2.1.1"
   },
   "engines": { "node": "*" },
   "licenses" : [

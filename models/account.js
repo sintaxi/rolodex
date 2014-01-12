@@ -86,6 +86,22 @@ module.exports = function(config) {
       ]
     },
     "methods": {
+
+      // generates token (non-authenticating)
+      token: function(q, callback){
+        var namespace = this.locals.namespace
+        var client    = this.locals.client
+        var that      = this
+        that.get(q, function(account){
+          if (!account) return callback(err, null)
+          var t = "foobar"
+          client.set("token:" + t, account.id, function(err){
+            callback(null, t)
+          })
+        })
+
+      },
+
       authenticate: function(q, password, cb){
         var namespace = this.locals.namespace
         var client    = this.locals.client
@@ -93,20 +109,17 @@ module.exports = function(config) {
 
         if (!cb) {
           cb = password
-
-          client.get("token:" + q, function(err, id){
-            if (id === null) {
-              console.log("here")
+          client.get("token:" + q, function(err, account_id){
+            if (account_id === null) {
               return cb({
                 details: {"token": "is not valid"},
                 messages: ["token is not valid"]
               })
+            }else{
+              that.get(account_id, function(record){
+                cb(null, record)
+              })
             }
-
-            that.get(id, function(record){
-              console.log(record)
-              cb(null, record)
-            })
           })
         }else{
           that.read(q, function(obj){
