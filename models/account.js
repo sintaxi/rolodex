@@ -117,7 +117,10 @@ module.exports = function(config) {
             messages: ["token is not valid"]
           })
           var t = crypto.randomBytes(16).toString('hex')
-          client.set("token:" + t, acct.id, function(err){
+          client.multi()
+          .set("token:" + t, acct.id)
+          .expire("token:" + t, 60 * 60 * 24 * 365)
+          .exec(function(err, replies){
             callback(null, t)
           })
         })
