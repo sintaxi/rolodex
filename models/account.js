@@ -107,10 +107,16 @@ module.exports = function(config) {
       },
 
       // generates token (non-authenticating)
-      token: function(q, callback){
+      token: function(q, exp, callback){
         var namespace = this.locals.namespace
         var client    = this.locals.client
         var that      = this
+
+        if(!callback){
+          callback = exp
+          exp = 60 * 60 * 24 * 365
+        }
+
         that.get(q, function(acct){
           if (!account) return callback({
             details: {"token": "is not valid"},
@@ -119,7 +125,7 @@ module.exports = function(config) {
           var t = crypto.randomBytes(16).toString('hex')
           client.multi()
           .set("token:" + t, acct.id)
-          .expire("token:" + t, 60 * 60 * 24 * 365)
+          .expire("token:" + t, exp)
           .exec(function(err, replies){
             callback(null, t)
           })
