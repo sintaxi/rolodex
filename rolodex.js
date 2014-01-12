@@ -3,31 +3,31 @@ var request  = require("request")
 
 module.exports = function(options) {
   if(!options) options = {}
-  
+
   // TODO: improve this feedback message
-  
+
   // need role config in production
   if(!options.hasOwnProperty("role")){
     throw "<role> required in configuration"
   }
-  
+
   // need email config in production
   if(process.env.NODE_ENV === "production"){
     if(!options.hasOwnProperty("email")){
       throw "<email> required in configuration in production mode."
     }
   }
-  
+
   var rolodex = {}
-  
+
   if(options.hasOwnProperty("role") && options["role"] == "slave"){
     // slave
-    
+
     var remote = function(endpoint){
       var endpoint = endpoint;
       return function(){
         var args = Array.prototype.slice.call(arguments)
-        var callback = args.pop()  
+        var callback = args.pop()
         var ops = {
           "method"  : "POST",
           "url"     : options.master + endpoint,
@@ -47,7 +47,7 @@ module.exports = function(options) {
         })
       }
     }
-    
+
     rolodex.account = {
       set:          remote("/account/set"),
       get:          remote("/account/get"),
@@ -59,7 +59,7 @@ module.exports = function(options) {
       promote:      remote("/account/promote"),
       del:          remote("/account/del")
     }
-    
+
     rolodex.listen = function(){
       var connect = require('connect')
       var http    = require('http')
@@ -85,7 +85,7 @@ module.exports = function(options) {
       var server = http.createServer(app)
       server.listen.apply(server, arguments)
     }
-    
+
   }else{
     // master
     options.store = options.store || {}
@@ -95,12 +95,12 @@ module.exports = function(options) {
       pass: "secret"
     }
     var client = redis.createClient(options.redis)
-    
+
     rolodex.account = require("./models/account")({
       client: client,
       email : options.email
     })
-    
+
     rolodex.listen = function(){
       var ar = arguments
       var connect = require('connect')
@@ -140,7 +140,7 @@ module.exports = function(options) {
           "key": privateKey,
           "cert": certificate
         }, app)
-      } 
+      }
 
       else {
 
@@ -151,6 +151,6 @@ module.exports = function(options) {
       server.listen.apply(server, arguments)
     }
   }
-  
+
   return rolodex
 }

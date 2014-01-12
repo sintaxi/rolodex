@@ -28,7 +28,7 @@ describe("all", function(){
       done()
     })
   })
-  
+
   it("should get all accounts", function(done) {
     rolodex.account.all(0, -1, function(accounts){
       accounts.should.be.an.instanceof(Array)

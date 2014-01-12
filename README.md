@@ -28,7 +28,7 @@ To create a rolodex object that gives us user management functions we must pass
 in a configuration object.
 
     var rolodex = require("rolodex")(config)
-    
+
 ## Configuration
 
 Rolodex can run in two different modes. `master` and `slave`.
@@ -79,7 +79,7 @@ errors it will look like the following...
 
 Account Object looks like the following...
 
-    { 
+    {
       id: 'ojzg-su2w-kqsn',
       uuid: 'b902b494-3392-4499-958b-2698b8ae411e',
       email: 'brock@sintaxi.com',
@@ -92,26 +92,27 @@ The account object gives you two basic functions `set` and `get`. The
 
 ### account.set([identifier,] props, callback)
 
-You are to provide an identifier if you wish to update the record. 
+You are to provide an identifier if you wish to update the record.
 Otherwise rolodex will assume a new record is being created.
 
 There are two ways to create an account.
 
-1) Pass in `email_verified` property with the value `true`. This is 
+1) Pass in `email_verified` property with the value `true`. This is
 when authentication has been done with a third party service such as
 Mozilla's Persona.
 
-    var validAccount = { 
+    var validAccount = {
       "email": "brock@sintaxi.com",
       "email_verified": true
     }
-    
-2) The other option is to pass in `password` and `password_confirmation` 
+
+2) The other option is to pass in `password` and `password_confirmation`
 properties. When this is the case, email will assume to be unverified.
 
-    var validAccount = { 
+    var validAccount = {
       "email": "brock@sintaxi.com",
-      "email_verified": true
+      "password": "secret",
+      "password_confirmation": "secret"
     }
 
 The set command with either object will create an account.
@@ -129,16 +130,16 @@ The set command with either object will create an account.
 The following are possible values for identifier.
 
   - account id (String). eg "ojzg-su2w-kgsn"
-  - uuid key value pair (Object). eg `{ uuid: "fdc7af2d-f3c2-4475-bb1c-7a17caed3564"}`  
-  - email key value pair (Object). eg `{ email: "hey@man.com"}`  
+  - uuid key value pair (Object). eg `{ uuid: "fdc7af2d-f3c2-4475-bb1c-7a17caed3564"}`
+  - email key value pair (Object). eg `{ email: "hey@man.com"}`
 
 eg. (find by params other than id)
 
     rolodex.account.get({ "email": "brock@sintaxi" }, function(account){
       console.log(account)
     })
-    
-### account.validate([identifier,] object, callback)    
+
+### account.validate([identifier,] object, callback)
 
 Validate is very similar to the set method except that it does not write to the store.
 
@@ -161,7 +162,7 @@ Gets all accounts
     rolodex.account.all(function(accounts){
       console.log(accounts)
     })
-    
+
 ### account.group(role, callback)
 
 Returns all records that match that role.
@@ -169,7 +170,7 @@ Returns all records that match that role.
     rolodex.account.group(3, function(accounts){
       console.log(accounts)
     })
-    
+
 ### account.authenticate(identifier, password, callback)
 
 Authenticates the account. If successful, the account will be returned.
