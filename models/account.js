@@ -9,14 +9,14 @@ var fetchAccount = function(obj, next){
   this.locals.account.get(obj.account, function(record){
     obj["account"] = record;
     next(obj)
-  })          
+  })
 }
 
 var fetchPromoter = function(obj, next){
   this.locals.account.get(obj.promoter, function(record){
     obj["promoter"] = record;
     next(obj)
-  })          
+  })
 }
 
 // admin validations
@@ -30,7 +30,7 @@ var cantBeSelf = function(field, obj, errors, next){
   if(obj.role != null && obj.promoter != null){
     if(obj.account.id == obj.promoter.id){
       errors.push("cannot be same as account")
-    }            
+    }
   }
   next()
 }
@@ -39,7 +39,7 @@ var cantBeSelf = function(field, obj, errors, next){
 module.exports = function(config) {
   config       = config || {}
   config.email = config.email || {}
-  
+
   var message = require("./message")(config.email)
 
   var account = new Thug({
@@ -53,11 +53,11 @@ module.exports = function(config) {
       ],
       "beforeValidate": [
         filters.id,
-        filters.uuid, 
+        filters.uuid,
         filters.role
       ],
       "beforeWrite": [
-        filters.hash, 
+        filters.hash,
         filters.password,
         filters.verified_at,
         filters.updated_at,
@@ -90,29 +90,49 @@ module.exports = function(config) {
         var namespace = this.locals.namespace
         var client    = this.locals.client
         var that      = this
-      
-        that.read(q, function(obj){
-          if(!obj){
-            return cb({
-              details: {"account": "is not in the system"},
-              messages: ["account is not in the system"]
-            }, null)
-          }
-          hash.validate(password, obj.hash, function(err, rsp){
-            if(rsp === true){
-              that.get(obj.id, function(record){
-                cb(null, record)
+
+        if (!cb) {
+          cb = password
+
+          client.get("token:" + q, function(err, id){
+            if (id === null) {
+              console.log("here")
+              return cb({
+                details: {"token": "is not valid"},
+                messages: ["token is not valid"]
               })
-            }else{
-              cb({
-                details: {"password": "is not correct"},
-                messages: ["password is not correct"]
+            }
+
+            that.get(id, function(record){
+              console.log(record)
+              cb(null, record)
+            })
+          })
+        }else{
+          that.read(q, function(obj){
+            if(!obj){
+              return cb({
+                details: {"account": "is not in the system"},
+                messages: ["account is not in the system"]
               }, null)
             }
+            hash.validate(password, obj.hash, function(err, rsp){
+              if(rsp === true){
+                that.get(obj.id, function(record){
+                  cb(null, record)
+                })
+              }else{
+                cb({
+                  details: {"password": "is not correct"},
+                  messages: ["password is not correct"]
+                }, null)
+              }
+            })
           })
-        })
+        }
+
       },
-      
+
       group: function(role, cb){
         var namespace = this.locals.namespace
         var client    = this.locals.client
@@ -137,7 +157,7 @@ module.exports = function(config) {
                     count++
                     if(count >= total){
                       cb(replies)
-                    } 
+                    }
                   })
                 })
               }
@@ -145,22 +165,22 @@ module.exports = function(config) {
           }
         })
       },
-      
+
       all: function(start, stop, cb){
         var namespace = this.locals.namespace
         var client    = this.locals.client
         var that      = this
-        
+
         if(!stop){
           cb    = start
           start = 0
           stop  = -1
         }
-        
+
         client.zrevrange(namespace + ":collection:created_at", start, stop, function(err, reply){
           var total = reply.length
           if(total === 0){
-            cb([]) 
+            cb([])
           }else{
             var count = 0
             var transaction = client.multi()
@@ -173,15 +193,15 @@ module.exports = function(config) {
                   count++
                   if(count == total){
                     cb(replies)
-                  } 
+                  }
                 })
               })
-            }) 
+            })
           }
         })
-        
+
       },
-      
+
       email: function(identifier, msg, cb){
         this.read(identifier, function(record){
           if(record) msg.to = record.email
@@ -193,9 +213,9 @@ module.exports = function(config) {
 
       promote: function(identifier, role, promoter, callback){
         if(role == null) role = 5
-        
+
         var that = this
-        
+
         // helper function for upgrading role
         var upgradeRole = function(id, role, callback){
           var namespace = that.locals.namespace
@@ -207,28 +227,28 @@ module.exports = function(config) {
           .exec(function(err, replies){
             if(!err) callback(true)
           })
-                    
+
           // obj.account.role = obj.role
           // this.locals.client.hset("account:" + id, "role", role, function(err, reply){
           //   if(!err) callback()
           // })
         }
-        
+
         //////////////
         // filters
         //////////////
-        
-        var fixRole = function(obj, next){          
+
+        var fixRole = function(obj, next){
           obj.role = parseInt(obj.role)
           if(obj.role < 0 || obj.role > 5)
             obj.role = 5
           next(obj)
         }
-        
+
         //////////////
         // validations
         //////////////
-        
+
         var mustBeHighEnough = function(field, obj, errors, next){
           if(obj.account != null && obj.promoter != null){
             if(obj.account.role < obj.promoter.role){
@@ -237,18 +257,18 @@ module.exports = function(config) {
           }
           next()
         }
-        
+
         var cantBeHigher = function(field, obj, errors, next){
           if(obj.role != null && obj.promoter != null){
             if(obj.role < obj.promoter.role){
               errors.push("cannot be higher than promoter")
-            }            
+            }
           }
           next()
         }
-        
+
         var upgrader = new Thug({
-          "locals": { 
+          "locals": {
             "client": this.locals.client,
             "account": this
           },
@@ -261,7 +281,7 @@ module.exports = function(config) {
             "role": [mustExist, cantBeHigher]
           }
         })
-        
+
         // setup write
         upgrader.constructor.prototype.write = function(identifier, obj, cb){
           obj.account.role = obj.role
@@ -273,13 +293,13 @@ module.exports = function(config) {
           //   if(!err) cb(obj.account)
           // })
         }
-        
+
         // return errors or account
         var self = this;
         upgrader.set({ account: identifier, role: role, promoter: promoter }, function(errors, record){
           if(errors){
             // upgrading own account
-            if( errors["details"]["promoter"] && errors["details"]["role"] && 
+            if( errors["details"]["promoter"] && errors["details"]["role"] &&
                 errors["details"]["promoter"] == "cannot be same as account" &&
                 errors["details"]["role"] == "cannot be higher than promoter"){
                 // self upgrade attempt. check to see if they are the only account
@@ -290,7 +310,7 @@ module.exports = function(config) {
                       a.role = role
                       self.locals.client.hset("account:" + a.id, "role", a.role, function(err, reply){
                         if(!err) callback(null, a)
-                      })                      
+                      })
                     })
                   }else{
                     // not only account. throw errors as usual
@@ -306,19 +326,19 @@ module.exports = function(config) {
             callback(null, record)
           }
         })
-        
+
       }
-      
+
     }
   })
-  
+
   // Read the Record
   // - takes an `id`
   // - must fire callback with the record or `null`
   account.constructor.prototype.read = function(q, cb){
     var namespace = this.locals.namespace
     var client    = this.locals.client
-    
+
     // DRY - simplify to one callback
     var callback = function(err, obj){
       if(err) return cb(null)
@@ -334,13 +354,13 @@ module.exports = function(config) {
       client.hgetall(namespace + ":" + q, callback)
     }
   }
-  
+
   // Write the Record
   // - must fire callback with errors or the record
   account.constructor.prototype.write = function(identifier, obj, cb){
     var namespace = this.locals.namespace
     var client    = this.locals.client
-    
+
     var key = namespace + ":" + obj.id
     client.hgetall(key, function(err, old){
       if(!old) old = {};
@@ -357,7 +377,7 @@ module.exports = function(config) {
       })
     })
   }
-  
+
   // Remove the Record
   // - must fire callback with errors or the record
   account.constructor.prototype.remove = function(identifier, record, callback){

@@ -7,7 +7,7 @@ var config  = JSON.parse(fs.readFileSync(__dirname + "/config/"+ role +".json"))
 
 describe("authenticate", function(){
   var rolodex = require("../")(config)
-   
+
    before(function(done){
      rolodex.account.set({
        "email": "brock@sintaxi.com",
@@ -17,7 +17,7 @@ describe("authenticate", function(){
        done()
      })
    })
-   
+
    it("should get validation error when account not in the sytem", function(done) {
      rolodex.account.authenticate({ email: "batman@sintaxi.com" }, "foobar", function(errors, account){
        errors.details.should.have.property("account", "is not in the system")
@@ -25,7 +25,7 @@ describe("authenticate", function(){
        done()
      })
    })
-   
+
    it("should get validation error wih incorrect password", function(done) {
      rolodex.account.authenticate({ email: "brock@sintaxi.com" }, "foobaz", function(errors, account){
        errors.details.should.have.property("password", "is not correct")
@@ -33,7 +33,7 @@ describe("authenticate", function(){
        done()
      })
    })
-   
+
    it("should return user object on successful authentication", function(done) {
      rolodex.account.authenticate({ email: "brock@sintaxi.com" }, "foobar", function(errors, account){
        account.should.have.property("id")
@@ -44,11 +44,19 @@ describe("authenticate", function(){
        done()
      })
    })
-   
-   after(function(){
-     client.flushall()
-     client.quit()
-   })
-  
+
+  it("should expect token authentication when single argument", function(done) {
+     rolodex.account.authenticate("someinvalidtoken", function(errors, account){
+       errors.details.should.have.property("token", "is not valid")
+       errors.messages.should.eql(["token is not valid"])
+       done()
+     })
+  })
+
+  after(function(){
+    client.flushall()
+    client.quit()
+  })
+
 })
 
