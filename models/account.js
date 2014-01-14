@@ -101,6 +101,7 @@ module.exports = function(config) {
           })
         }else{
           that.authenticate(q, password, function(err, acct){
+            if(err) return callback(err, null)
             that.token(acct.id, callback)
           })
         }
@@ -118,7 +119,7 @@ module.exports = function(config) {
         }
 
         that.get(q, function(acct){
-          if (!account) return callback({
+          if (!acct) return callback({
             details: {"token": "is not valid"},
             messages: ["token is not valid"]
           })
