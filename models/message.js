@@ -20,7 +20,7 @@ var setReplyTo = function(obj, next){
   {
      "defaults": {
        "reply_to": "...",
-       "from": "..."       
+       "from": "..."
      }
      "postmark": { token: "..." }
   }
@@ -29,7 +29,7 @@ module.exports = function(config) {
   config          = config || {}
   config.defaults = config.defaults || {}
   config.postmark = config.postmark || {}
-  
+
   var message = new Thug({
     "locals": config,
     "filters":{
@@ -43,11 +43,11 @@ module.exports = function(config) {
       "body"    : [validations.present]
     }
   })
-  
+
   // Write the Record
   message.constructor.prototype.write = function(identifier, obj, cb){
     // send message here
-    
+
     // let slave pass in postmark token
     if(obj.hasOwnProperty("postmark")){
       var postmark = obj.postmark
@@ -55,13 +55,14 @@ module.exports = function(config) {
     }else{
       var postmark = this.locals.postmark
     }
-    
+
     var body = {
       "To"        : obj.to,
       "From"      : obj.from,
       "Subject"   : obj.subject,
       "TextBody"  : obj.body,
-      "ReplyTo"   : obj.reply_to
+      "ReplyTo"   : obj.reply_to,
+      "HtmlBody"  : obj.body_html
     }
 
     var args = {
@@ -93,6 +94,6 @@ module.exports = function(config) {
     }
 
   }
-  
+
   return message
 }

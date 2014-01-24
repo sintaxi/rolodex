@@ -6,12 +6,13 @@ var role   = process.env.ROLE || "master"
 var config  = JSON.parse(fs.readFileSync(__dirname + "/config/"+ role +".json"))
 
 
-describe("email", function(){  
+describe("email", function(){
   var rolodex = require("../")(config)
-   
+
   var validEmail = {
-    subject: "Hello", 
-    body: "Welcome"
+    subject: "Hello",
+    body: "Welcome",
+    body_html: "<b>Welcome</b>"
   }
 
   before(function(done){
@@ -29,7 +30,7 @@ describe("email", function(){
      done()
    })
   })
-  
+
   it("should get validation error wih incorrect params", function(done) {
    rolodex.account.email({ email: "brock@sintaxi.com" }, {}, function(errors, account){
      errors.details.should.have.property("subject", "must be present")
@@ -52,6 +53,6 @@ describe("email", function(){
    client.flushall()
    client.quit()
   })
-  
+
 })
 
