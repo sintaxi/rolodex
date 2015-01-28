@@ -6,7 +6,7 @@
   "keywords": ["redis", "account management", "users", "authentication"],
   "main": "./rolodex.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha -t 10000"
+    "test": "mocha -R spec -t 10000"
   },
   "repository": {
     "type": "git",
