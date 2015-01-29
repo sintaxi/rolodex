@@ -17,7 +17,7 @@ describe("create by password", function(){
   it("password must be present", function(done) {
     var accountParams = { "email": "brock@example.com" }
     rolodex.account.set(accountParams, function(errors, account){
-      errors.messages.should.include("password must be present")
+      errors.messages.should.containEql("password must be present")
       done()
     })
   })
@@ -25,7 +25,7 @@ describe("create by password", function(){
   it("password confirmation must be present", function(done) {
     var accountParams = { "email": "brock@example.com", "password": "foobar" }
     rolodex.account.set(accountParams, function(errors, account){
-      errors.messages.should.include("password confirmation must be present")
+      errors.messages.should.containEql("password confirmation must be present")
       done()
     })
   })
