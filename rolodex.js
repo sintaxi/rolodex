@@ -103,6 +103,26 @@ module.exports = function(options) {
       email : options.email
     })
 
+    rolodex.email = function(args, cb) {
+
+      options       = options || {};
+      options.email = options.email || {}
+
+      var message = require("./models/message")(options.email);
+
+      var args = {
+        to: args.email,
+        subject:args.subject,
+        body:args.body,
+        body_html:args.body_html
+      }
+
+      message.set(args, function(errors, reply){
+        cb(errors, reply)
+      });
+
+    }
+
     rolodex.listen = function(){
       var ar = arguments
       var connect = require('connect')
