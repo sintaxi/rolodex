@@ -111,7 +111,7 @@ module.exports = function(options) {
       var message = require("./models/message")(options.email);
 
       var args = {
-        to: args.email,
+        to: args.to,
         subject:args.subject,
         body:args.body,
         body_html:args.body_html
