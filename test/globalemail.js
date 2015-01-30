@@ -9,42 +9,37 @@ var config  = JSON.parse(fs.readFileSync(__dirname + "/config/"+ role +".json"))
 describe("global_email", function(){
   var rolodex = require("../")(config)
 
-  var validEmail = {
-    email: "rob@silentrob.me",
-    subject: "Hello",
-    body: "Welcome",
-    body_html: "<b>Welcome</b>"
-  }
-
-
-  var inValidEmail = {
-    subject: "Hello",
-    body: "Welcome",
-    body_html: "<b>Welcome</b>"
-  }
-
   before(function(done){
     done()
-  });
-
+  })
 
   it("should err missind paramsystem", function(done) {
-    rolodex.email(inValidEmail, function(errors, status) {
-      errors.should.exist;
-      done();
-   });
-  });
+    rolodex.email({
+      subject: "Hello",
+      body: "Welcome",
+      body_html: "<b>Welcome</b>"
+    }, function(errors, status) {
+      errors.should.exist
+      errors.details.should.have.property("to")
+      done()
+    })
+  })
 
   it("should send a email from the system", function(done) {
-   rolodex.email(validEmail, function(errors, status) {
+    rolodex.email({
+      email: "rob@silentrob.me",
+      subject: "Hello",
+      body: "Welcome",
+      body_html: "<b>Welcome</b>"
+    }, function(errors, status) {
     should.not.exist(errors)
-     done();
-   });
-  });
-  
-  after(function(){
-   client.flushall();
-   client.quit();
-  });
+      done()
+    })
+  })
 
-});
+  after(function(){
+   client.flushall()
+   client.quit()
+  })
+
+})
