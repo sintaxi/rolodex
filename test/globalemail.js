@@ -6,7 +6,7 @@ var role   = process.env.ROLE || "master"
 var config  = JSON.parse(fs.readFileSync(__dirname + "/config/"+ role +".json"))
 
 
-describe.only("global_email", function(){
+describe("global_email", function(){
   var rolodex = require("../")(config)
 
   var validEmail = {
