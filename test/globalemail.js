@@ -28,7 +28,7 @@ describe("global_email", function(){
 
   it("should send a email from the system", function(done) {
     rolodex.email({
-      email: "rob@silentrob.me",
+      to: "rob@silentrob.me",
       subject: "Hello",
       body: "Welcome",
       body_html: "<b>Welcome</b>"
