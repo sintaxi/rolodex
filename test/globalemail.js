@@ -38,6 +38,17 @@ describe("global_email", function(){
     })
   })
 
+  it("should work without body_html", function(done) {
+    rolodex.email({
+      to: "rob@silentrob.me",
+      subject: "Hello",
+      body: "Welcome"
+    }, function(errors, status) {
+    should.not.exist(errors)
+      done()
+    })
+  })
+
   after(function(){
    client.flushall()
    client.quit()
