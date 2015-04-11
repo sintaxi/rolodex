@@ -76,7 +76,7 @@ module.exports = function(config) {
       }
     }
 
-    if(process.env.NODE_ENV == "production"){
+    if(["development", "production"].indexOf(process.env.NODE_ENV) !== -1) {
       request(args, function(e, r, b){
         if(r.statusCode == 200){
           cb(obj)
@@ -84,12 +84,13 @@ module.exports = function(config) {
           cb(null)
         }
       })
-    }else if(process.env.NODE_ENV == "development"){
-      console.log("email...")
-      console.log(body)
-      console.log("")
-      cb(obj)
-    }else{
+
+      if(process.env.NODE_ENV == "development"){
+        console.log("\n", "-----------", "\n")
+        console.log(body)
+        console.log()
+      }
+    } else {
       cb(obj)
     }
 
