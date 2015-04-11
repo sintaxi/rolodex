@@ -87,7 +87,11 @@ module.exports = function(config) {
 
       if(process.env.NODE_ENV == "development"){
         console.log("\n", "-----------", "\n")
-        console.log(body)
+        console.log("  subject:", obj.subject)
+        console.log("       to:", obj.to)
+        console.log("     from:", obj.from)
+        console.log()
+        console.log(obj.body)
         console.log()
       }
     } else {
