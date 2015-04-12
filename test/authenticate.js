@@ -10,7 +10,7 @@ describe("authenticate", function(){
 
    before(function(done){
      rolodex.account.set({
-       "email": "brock@sintaxi.com",
+       "email": "brock+bar@sintaxi.com",
        "password":"foobar",
        "password_confirmation":"foobar"
        }, function(errors, account){
@@ -27,7 +27,7 @@ describe("authenticate", function(){
    })
 
    it("should get validation error wih incorrect password", function(done) {
-     rolodex.account.authenticate({ email: "brock@sintaxi.com" }, "foobaz", function(errors, account){
+     rolodex.account.authenticate({ email: "brock+bar@sintaxi.com" }, "foobaz", function(errors, account){
        errors.details.should.have.property("password", "is not correct")
        errors.messages.should.eql(["password is not correct"])
        done()
@@ -35,9 +35,9 @@ describe("authenticate", function(){
    })
 
    it("should return user object on successful authentication", function(done) {
-     rolodex.account.authenticate({ email: "brock@sintaxi.com" }, "foobar", function(errors, account){
+     rolodex.account.authenticate({ email: "brock+bar@sintaxi.com" }, "foobar", function(errors, account){
        account.should.have.property("id")
-       account.should.have.property("email", "brock@sintaxi.com")
+       account.should.have.property("email", "brock+bar@sintaxi.com")
        account.should.have.property("uuid")
        account.should.have.property("created_at")
        account.should.have.property("updated_at")

@@ -9,7 +9,7 @@ describe("create by password", function(){
   var rolodex = require("../")(config)
 
   var validAccountDetails = { 
-    "email": "brock@sintaxi.com",
+    "email": "brock+foo@sintaxi.com",
     "password": "foobar",
     "password_confirmation": "foobar"
   }
@@ -32,8 +32,9 @@ describe("create by password", function(){
 
   it("should create account with valid params", function(done) {
     rolodex.account.set(validAccountDetails, function(errors, account){
+      console.log(errors);
       account.should.have.property("id")
-      account.should.have.property("email", "brock@sintaxi.com")
+      account.should.have.property("email", "brock+foo@sintaxi.com")
       account.should.have.property("uuid")
       account.should.have.property("email_verified_at")
       account.should.have.property("created_at")
