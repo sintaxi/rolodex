@@ -8,7 +8,7 @@ var config  = JSON.parse(fs.readFileSync(__dirname + "/config/"+ role +".json"))
 describe("create by password", function(){
   var rolodex = require("../")(config)
 
-  var validAccountDetails = { 
+  var validAccountDetails = {
     "email": "brock@sintaxi.com",
     "password": "foobar",
     "password_confirmation": "foobar"
@@ -35,7 +35,21 @@ describe("create by password", function(){
       account.should.have.property("id")
       account.should.have.property("email", "brock@sintaxi.com")
       account.should.have.property("uuid")
-      account.should.have.property("email_verified_at")
+      account.should.have.property("email_verified_at", null)
+      account.should.have.property("created_at")
+      account.should.have.property("updated_at")
+      account.should.not.have.property("password")
+      done()
+    })
+  })
+
+  it("should be able to verify email", function(done) {
+    validAccountDetails.email_verified = true
+    rolodex.account.set({ email: validAccountDetails.email }, validAccountDetails, function(errors, account){
+      account.should.have.property("id")
+      account.should.have.property("email", "brock@sintaxi.com")
+      account.should.have.property("uuid")
+      account.should.have.property("email_verified_at").not.be.null
       account.should.have.property("created_at")
       account.should.have.property("updated_at")
       account.should.not.have.property("password")
