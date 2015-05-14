@@ -8,7 +8,7 @@ var config  = JSON.parse(fs.readFileSync(__dirname + "/config/"+ role +".json"))
 describe("create by verified email", function(){
   var rolodex = require("../")(config)
 
-  var validAccountDetails = { 
+  var validAccountDetails = {
     "email": "brock@sintaxi.com",
     "email_verified": true
   }
@@ -52,7 +52,7 @@ describe("create by verified email", function(){
       done()
     })
   })
-  
+
   it("should not create account without unique email", function(done) {
     var accountParams = { "email": "brock@sintaxi.com", "email_verified": true }
     rolodex.account.set(accountParams, function(errors, account){
@@ -62,15 +62,15 @@ describe("create by verified email", function(){
     })
   })
 
-  it("should not create account with verified set to false", function(done) {
-    var accountParams = { "email": "brock@something.com", "email_verified": false }
-    rolodex.account.set(accountParams, function(errors, account){
-      errors.messages.should.containEql("email must be verified")
-      errors.details.should.have.property("email", "must be verified")
-      done()
-    })
-  })
-  
+  // it("should not create account with verified set to false", function(done) {
+  //   var accountParams = { "email": "brock@something.com", "email_verified": false }
+  //   rolodex.account.set(accountParams, function(errors, account){
+  //     errors.messages.should.containEql("email must be verified")
+  //     errors.details.should.have.property("email", "must be verified")
+  //     done()
+  //   })
+  // })
+
   it("should not create account without valid email", function(done) {
     var accountParams = { "email": "brockatsintaxi.com" }
     rolodex.account.set(accountParams, function(errors, account){

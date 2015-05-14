@@ -12,14 +12,17 @@ describe("payment", function(){
   before(function(done){
     rolodex.account.set({
       "email": "brock@sintaxi.com",
-      "email_verified": true
+      "password": "heyo",
+      "password_confirmation": "heyo"
       }, function(errors, account){
      done()
     })
   })
 
-  it("should get validation error when account not in the sytem", function(done) {
-   rolodex.account.set({ email: "brock@sintaxi.com" }, { "payment_id": "abc" }, function(errors, account){
+  it("should be able to set payment_id", function(done) {
+
+   rolodex.account.set({ email: "brock@sintaxi.com" }, { "payment_id": "abc", "email_verified": false }, function(errors, account){
+     console.log(errors, account)
      account.should.have.property("payment_id", "abc")
      done()
    })
