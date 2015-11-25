@@ -7,11 +7,12 @@ var config  = JSON.parse(fs.readFileSync(__dirname + "/config/"+ role +".json"))
 
 
 describe("get", function(){
+  config.defaultScope = "surge.sh"
   var rolodex = require("../")(config)
-  
+
   var account_id, uuid
   before(function(done){
-    var validAccountDetails = { 
+    var validAccountDetails = {
       "email": "brock@sintaxi.com",
       "email_verified": true
     }
@@ -30,6 +31,7 @@ describe("get", function(){
       account.should.have.property("uuid")
       account.should.have.property("created_at")
       account.should.have.property("updated_at")
+      account.should.have.property("scope")
       account.should.not.have.property("hash")
       account.should.not.have.property("password")
       account.should.not.have.property("password_confirmation")
@@ -50,7 +52,7 @@ describe("get", function(){
       done()
     })
   })
-  
+
   it("should get by UUID", function(done) {
     rolodex.account.get({ uuid: uuid }, function(account){
       account.should.have.property("id", account_id)
