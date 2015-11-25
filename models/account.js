@@ -46,7 +46,8 @@ module.exports = function(config) {
   var account = new Thug({
     "locals": {
       "namespace": "account",
-      "client": config.client
+      "client": config.client,
+      "defaultScope": config.defaultScope
     },
     "filters": {
       "in": [

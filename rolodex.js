@@ -97,11 +97,16 @@ module.exports = function(options, redisClient) {
       pass: "secret"
     }
     var client = redisClient || redis.createClient(options.redis)
-
-    rolodex.account = require("./models/account")({
+    var config = {
       client: client,
       email : options.email
-    })
+    }
+
+    if (options.hasOwnProperty("defaultScope")) {
+      config.defaultScope = options.defaultScope
+    }
+
+    rolodex.account = require("./models/account")(config)
 
     rolodex.email = function(args, cb) {
 
