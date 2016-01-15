@@ -47,7 +47,7 @@ module.exports = function(config) {
     "locals": {
       "namespace": "account",
       "client": config.client,
-      "defaultScope": config.defaultScope
+      "scope": config.scope
     },
     "filters": {
       "in": [
@@ -91,6 +91,10 @@ module.exports = function(config) {
 
       authtoken: function(q, password, callback){
         var namespace = this.locals.namespace
+
+        if (this.locals.scope)
+          namespace += "-" + this.locals.scope
+
         var client    = this.locals.client
         var that      = this
 
@@ -111,6 +115,10 @@ module.exports = function(config) {
       // generates token (non-authenticating)
       token: function(q, exp, callback){
         var namespace = this.locals.namespace
+
+        if (this.locals.scope)
+          namespace += "-" + this.locals.scope
+
         var client    = this.locals.client
         var that      = this
 
@@ -136,6 +144,10 @@ module.exports = function(config) {
 
       authenticate: function(q, password, cb){
         var namespace = this.locals.namespace
+
+        if (this.locals.scope)
+          namespace += "-" + this.locals.scope
+
         var client    = this.locals.client
         var that      = this
 
@@ -180,6 +192,10 @@ module.exports = function(config) {
 
       group: function(role, cb){
         var namespace = this.locals.namespace
+
+        if (this.locals.scope)
+          namespace += "-" + this.locals.scope
+
         var client    = this.locals.client
         var that      = this
 
@@ -213,6 +229,10 @@ module.exports = function(config) {
 
       all: function(start, stop, cb){
         var namespace = this.locals.namespace
+
+        if (this.locals.scope)
+          namespace += "-" + this.locals.scope
+
         var client    = this.locals.client
         var that      = this
 
@@ -264,6 +284,10 @@ module.exports = function(config) {
         // helper function for upgrading role
         var upgradeRole = function(id, role, callback){
           var namespace = that.locals.namespace
+
+          if (that.locals.scope)
+            namespace += "-" + that.locals.scope
+
           var client    = that.locals.client
           var key = namespace + ":" + id
           client.multi()
@@ -315,7 +339,8 @@ module.exports = function(config) {
         var upgrader = new Thug({
           "locals": {
             "client": this.locals.client,
-            "account": this
+            "account": this,
+            "scope": this.locals.scope
           },
           "filters":{
             "in": [fetchAccount, fetchPromoter, fixRole]
@@ -382,6 +407,10 @@ module.exports = function(config) {
   // - must fire callback with the record or `null`
   account.constructor.prototype.read = function(q, cb){
     var namespace = this.locals.namespace
+
+    if (this.locals.scope)
+      namespace += "-" + this.locals.scope
+
     var client    = this.locals.client
 
     // DRY - simplify to one callback
@@ -404,6 +433,10 @@ module.exports = function(config) {
   // - must fire callback with errors or the record
   account.constructor.prototype.write = function(identifier, obj, cb){
     var namespace = this.locals.namespace
+
+    if (this.locals.scope)
+      namespace += "-" + this.locals.scope
+
     var client    = this.locals.client
 
     var key = namespace + ":" + obj.id
@@ -427,6 +460,10 @@ module.exports = function(config) {
   // - must fire callback with errors or the record
   account.constructor.prototype.remove = function(identifier, record, callback){
     var namespace = this.locals.namespace
+
+    if (this.locals.scope)
+      namespace += "-" + this.locals.scope
+
     var client    = this.locals.client
     client.multi()
     .del(namespace + ":" + record.id)

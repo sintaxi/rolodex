@@ -6,9 +6,10 @@ var role   = process.env.ROLE || "master"
 var config  = JSON.parse(fs.readFileSync(__dirname + "/config/"+ role +".json"))
 
 describe("create with first and/or last name", function(){
+  config.scope = "foo"
   var rolodex = require("../")(config)
 
-  var validAccountDetails = { 
+  var validAccountDetails = {
     "first_name": "Dr. Brock",
     "last_name": "Whitten",
     "email": "brock@sintaxi.com",

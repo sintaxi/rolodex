@@ -6,6 +6,7 @@ var role   = process.env.ROLE || "master"
 var config  = JSON.parse(fs.readFileSync(__dirname + "/config/"+ role +".json"))
 
 describe("create by password", function(){
+  config.scope = "foo"
   var rolodex = require("../")(config)
 
   var validAccountDetails = {

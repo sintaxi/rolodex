@@ -6,6 +6,7 @@ var role   = process.env.ROLE || "master"
 var config  = JSON.parse(fs.readFileSync(__dirname + "/config/"+ role +".json"))
 
 describe("create by verified email", function(){
+  config.scope = "foo"
   var rolodex = require("../")(config)
 
   var validAccountDetails = {
@@ -56,6 +57,7 @@ describe("create by verified email", function(){
   it("should not create account without unique email", function(done) {
     var accountParams = { "email": "brock@sintaxi.com", "email_verified": true }
     rolodex.account.set(accountParams, function(errors, account){
+      console.log(errors, account)
       errors.messages.should.containEql("email already in use")
       errors.details.should.have.property("email", "already in use")
       done()

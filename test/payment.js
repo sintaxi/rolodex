@@ -20,9 +20,7 @@ describe("payment", function(){
   })
 
   it("should be able to set payment_id", function(done) {
-
    rolodex.account.set({ email: "brock@sintaxi.com" }, { "payment_id": "abc", "email_verified": false }, function(errors, account){
-     console.log(errors, account)
      account.should.have.property("payment_id", "abc")
      done()
    })
