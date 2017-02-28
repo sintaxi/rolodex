@@ -19,7 +19,7 @@ describe("global_email", function(){
       body: "Welcome",
       body_html: "<b>Welcome</b>"
     }, function(errors, status) {
-      errors.should.exist
+      should.exist(errors)
       errors.messages.should.have.lengthOf(1)
       errors.details.should.have.property("to")
       done()
