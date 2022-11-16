@@ -1,7 +1,7 @@
 {
   "name": "rolodex",
   "description": "Node account management system using redis",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "author": "Brock Whitten <brock@sintaxi.com>",
   "keywords": [
     "redis",
@@ -18,13 +18,13 @@
     "url": "https://github.com/sintaxi/node-rolodex.git"
   },
   "dependencies": {
-    "redis": "0.7.2",
+    "bcrypt": "5.1.0",
     "connect": "3.6.6",
-    "request": "2.88.0",
-    "bcrypt": "3.0.0",
+    "redis": "^2.8.0",
+    "request": "2.88.2",
+    "thug": "0.4.2",
     "uuid": "3.3.2",
-    "validator": "0.2.8",
-    "thug": "0.4.2"
+    "validator": "0.2.8"
   },
   "devDependencies": {
     "mocha": "3.*",

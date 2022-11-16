@@ -67,7 +67,7 @@ module.exports = function(config) {
 
     var args = {
       "method"  : "POST",
-      "url"     : "http://api.postmarkapp.com/email",
+      "url"     : "https://api.postmarkapp.com/email",
       "body"    : JSON.stringify(body),
       "headers" : {
         "Accept"                  : "application/json",
