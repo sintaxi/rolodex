@@ -11,6 +11,10 @@
   ],
   "main": "./rolodex.js",
   "scripts": {
+    "prepare": "git config core.hooksPath ./hooks",
+    "preversion": "npm test",
+    "postversion": "git push && git push --tags --no-verify",
+    "version": "npm publish",
     "test": "mocha -R spec -t 10000"
   },
   "repository": {
