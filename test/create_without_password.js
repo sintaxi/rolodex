@@ -40,6 +40,29 @@ describe("create by verified email", function(){
     })
   })
 
+  it("should validate a password key holding undefined instead of throwing", function(done) {
+    // the shape slushi sends when a basic-auth header arrives with no
+    // colon: the password KEY exists but the value is undefined —
+    // hasOwnProperty passes and .length threw before validating
+    var accountParams = {
+      "email": "brock@example.com",
+      "password": undefined,
+      "password_confirmation": undefined
+    }
+    rolodex.account.set(accountParams, function(errors, account){
+      errors.messages.should.containEql("password must be present")
+      done()
+    })
+  })
+
+  it("should validate a null password instead of throwing", function(done) {
+    var accountParams = { "email": "brock@example.com", "password": null, "password_confirmation": null }
+    rolodex.account.set(accountParams, function(errors, account){
+      errors.messages.should.containEql("password must be present")
+      done()
+    })
+  })
+
   it("should create account", function(done) {
     rolodex.account.set(validAccountDetails, function(errors, account){
       account.should.have.property("id")
