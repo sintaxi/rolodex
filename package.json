@@ -15,27 +15,29 @@
     "preversion": "npm test",
     "postversion": "git push && git push --tags --no-verify",
     "version": "npm publish",
-    "test": "mocha -R spec -t 10000"
+    "test": "mocha -R spec -t 10000 --exit"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/sintaxi/node-rolodex.git"
   },
   "dependencies": {
-    "bcrypt": "5.1.0",
-    "connect": "3.6.6",
-    "redis": "^2.8.0",
-    "request": "2.88.2",
-    "thug": "0.4.2",
-    "uuid": "3.3.2",
-    "validator": "0.2.8"
+    "bcrypt": "6.0.0",
+    "connect": "3.7.0",
+    "redis": "^5.12.1",
+    "thug": "0.4.4",
+    "validator": "13.15.35"
   },
   "devDependencies": {
-    "mocha": "3.*",
-    "should": "^4.6.2"
+    "mocha": "11.*",
+    "should": "^13.2.3"
+  },
+  "overrides": {
+    "serialize-javascript": "^7.0.5",
+    "diff": "^8.0.3"
   },
   "engines": {
-    "node": "*"
+    "node": ">=18"
   },
   "licenses": [
     {

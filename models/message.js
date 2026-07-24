@@ -1,4 +1,4 @@
-var request     = require("request")
+var request     = require("../lib/post")
 var Thug        = require("thug")
 var validations = require("../lib/validations")
 

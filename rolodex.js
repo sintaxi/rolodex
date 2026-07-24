@@ -1,5 +1,4 @@
-var redis   = require("redis")
-var request  = require("request")
+var request  = require("./lib/post")
 
 module.exports = function(options, redisClient) {
   if(!options) options = {}
@@ -96,7 +95,7 @@ module.exports = function(options, redisClient) {
       user: "default",
       pass: "secret"
     }
-    var client = redisClient || redis.createClient(options.redis)
+    var client = redisClient || require("./lib/client")(options.redis)
 
     rolodex.account = require("./models/account")({
       client: client,

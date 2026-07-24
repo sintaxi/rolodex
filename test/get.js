@@ -1,6 +1,6 @@
 var fs     = require("fs")
 var should = require("should")
-var client = require("redis").createClient()
+var client = require("../lib/client")()
 
 var role   = process.env.ROLE || "master"
 var config  = JSON.parse(fs.readFileSync(__dirname + "/config/"+ role +".json"))
