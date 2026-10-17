@@ -50,7 +50,8 @@ module.exports = function(config) {
     },
     "filters": {
       "in": [
-        filters.whitelist
+        filters.whitelist,
+        filters.email
       ],
       "beforeValidate": [
         filters.id,
@@ -391,7 +392,16 @@ module.exports = function(config) {
 
     if(typeof q == 'object'){
       for(var key in q) break;
-      client.get(namespace + ":" + key + ":" + q[key], function(err, id){
+      var value = q[key]
+      client.get(namespace + ":" + key + ":" + value, function(err, id){
+        // an email finds its account as given first, so every record keeps
+        // answering exactly as before, then by its normal form: accounts
+        // are stored that way from 0.20.0 on (plans/email-case.md)
+        if(!id && key === "email" && typeof value === "string" && filters.normal(value) !== value){
+          return client.get(namespace + ":email:" + filters.normal(value), function(err, id){
+            client.hgetall(namespace + ":" + id, callback)
+          })
+        }
         client.hgetall(namespace + ":" + id, callback)
       })
     }else{
