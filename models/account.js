@@ -51,7 +51,8 @@ module.exports = function(config) {
     "filters": {
       "in": [
         filters.whitelist,
-        filters.email
+        filters.email,
+        filters.marks
       ],
       "beforeValidate": [
         filters.id,
@@ -62,6 +63,7 @@ module.exports = function(config) {
         filters.hash,
         filters.password,
         filters.verified_at,
+        filters.stamps,
         filters.updated_at,
         filters.created_at
       ],
@@ -85,6 +87,9 @@ module.exports = function(config) {
       "password": [
         validations.presentPassword,
         validations.confirmation
+      ],
+      "bot_mark": [
+        validations.botLabel
       ]
     },
     "methods": {

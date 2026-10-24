@@ -121,6 +121,20 @@ The set command with either object will create an account.
       console.log(account)
     })
 
+Some facts about an account are set once and never cleared. Passing
+the flag stamps a time the first time; passing it again changes nothing.
+
+- `payment_verified: true` sets `payment_verified_at`, when a payment
+  method was first proven.
+- `bot: "<platform>"` sets `bot` and `bot_at`: the account is operated
+  by software with its own identity (`grok`, `instinct`, or `unknown`).
+  The label is 1-32 lowercase letters, digits or dashes, and the first
+  one recorded is kept. An account without `bot` is a person.
+
+      rolodex.account.set({ email: "agent@mail.grokbot.com" }, { bot: "grok" }, function(errors, account){
+        console.log(account.bot, account.bot_at)
+      })
+
 ### account.get(identifier, callback)
 
     rolodex.account.get("ojzg-su2w-kqsn", function(account){
