@@ -102,6 +102,11 @@ module.exports = function(options, redisClient) {
       email : options.email
     })
 
+    // master only (models/org.js)
+    rolodex.org = require("./models/org")({
+      client: client
+    })
+
     rolodex.email = function(args, cb) {
 
       options       = options || {};

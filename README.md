@@ -193,6 +193,73 @@ Authenticates the account. If successful, the account will be returned.
       console.log(account)
     })
 
+## Orgs
+
+An org is a container of accounts with roles (`admin` or `member`). Its
+id never changes; domains, money and tokens elsewhere refer to that id.
+The slug and name can both be renamed. An org holds one live slug. The
+slug a rename leaves behind is protected for 30 days: it still resolves
+to the org and no other org can take it. After that it's a soft alias,
+resolving to the org until another org claims it. Only one old slug is
+protected at a time, so renaming again turns the previous one into a soft
+alias straight away. Deleting an org releases its slugs at once.
+
+Slugs are 3-63 lowercase letters, digits or dashes, with no dash at
+either end. Reserved words (`http`, `https`, `www`, `api`, `admin`,
+`support`, `docs`, `status` and others in `models/org.js`) and anything
+reading as surge itself (`surge`, `surge-*`) are refused. Names are 1-64
+characters.
+
+Every write is atomic: slugs are unique, an org always has at least one
+admin, and caps are checked in the same write. Caps are passed in by the
+caller. Orgs are master only: slave mode has no org methods.
+
+### org.create(props, callback)
+
+`props`: `slug`, `name`, `admin` (account id, the first admin), and
+optionally `members` (`{ accountId: role }`) and `adminCap` (how many orgs
+the admin may administer).
+
+    rolodex.org.create({ slug: "acme", name: "Acme", admin: personId, members: { [botId]: "member" } }, function(errors, org){
+      console.log(org.id, org.slug, org.name)
+    })
+
+### org.get(idOrSlug, callback)
+
+Finds an org by id, by its live slug, or by an old slug that still
+resolves to it. A deleted org isn't found.
+
+### org.rename(id, { slug, name }, callback)
+
+Either or both. The id stays the same; the old slug is protected for 30
+days, then resolves as a soft alias until another org claims it.
+
+### org.members(id, callback)
+
+`{ accountId: role }`.
+
+### org.setMember(id, accountId, role, [{ cap }], callback)
+
+Adds an account or changes its role. `cap` limits members per org (role
+changes don't count). Demoting the last admin is refused.
+
+### org.removeMember(id, accountId, callback)
+
+Removing the last admin is refused.
+
+### org.ofAccount(accountId, callback)
+
+The account's orgs, each with the account's `role`.
+
+### org.del(id, callback)
+
+Leaves a tombstone: the org stops resolving, its members are released,
+and its slugs are free for anyone at once. Whether it may be deleted (does it still own
+anything?) is the caller's check.
+
+Deleting an account is refused while it is the only admin of an org;
+otherwise the account leaves every org first.
+
 ## Roles
 
 Roles are arbitrary but this is the line of thinking when creating this lib.

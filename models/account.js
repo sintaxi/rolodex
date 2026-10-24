@@ -42,6 +42,7 @@ module.exports = function(config) {
   config.email = config.email || {}
 
   var message = require("./message")(config.email)
+  var orgs    = require("./org")({ client: config.client })
 
   var account = new Thug({
     "locals": {
@@ -442,14 +443,24 @@ module.exports = function(config) {
   account.constructor.prototype.remove = function(identifier, record, callback){
     var namespace = this.locals.namespace
     var client    = this.locals.client
-    client.multi()
-    .del(namespace + ":" + record.id)
-    .del(namespace + ":email:" + record.email)
-    .del(namespace + ":uuid:" + record.uuid)
-    .zrem(namespace + ":collection:role", record.id)
-    .zrem(namespace + ":collection:created_at", record.id)
-    .exec(function(err, replies){
-      if(!err) callback(null)
+
+    var removeRecord = function(){
+      client.multi()
+      .del(namespace + ":" + record.id)
+      .del(namespace + ":email:" + record.email)
+      .del(namespace + ":uuid:" + record.uuid)
+      .zrem(namespace + ":collection:role", record.id)
+      .zrem(namespace + ":collection:created_at", record.id)
+      .exec(function(err, replies){
+        if(!err) callback(null)
+      })
+    }
+
+    // an org always has an admin: the account can't go while it is an
+    // org's only admin; otherwise it leaves every org first
+    orgs.leaveAll(record.id, function(errors){
+      if (errors) return callback(errors)
+      removeRecord()
     })
   }
 
