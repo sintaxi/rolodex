@@ -4,6 +4,14 @@ var filters     = require("../lib/filters")
 var validations = require("../lib/validations")
 var hash        = require("../lib/hash")
 
+// a write redis refused: the callback still fires, with errors, so a
+// request never waits on a reply that isn't coming
+var refused = function(field, message){
+  var details = {}
+  details[field] = message
+  return { details: details, messages: [field + " " + message] }
+}
+
 // admin filters
 
 var fetchAccount = function(obj, next){
@@ -135,6 +143,7 @@ module.exports = function(config) {
           .set("token:" + t, acct.id)
           .expire("token:" + t, exp)
           .exec(function(err, replies){
+            if (err) return callback(refused("token", "could not be saved"))
             callback(null, t)
           })
         })
@@ -148,7 +157,7 @@ module.exports = function(config) {
         if (!cb) {
           cb = password
           client.get("token:" + q, function(err, account_id){
-            if (account_id === null) {
+            if (err || !account_id) {
               return cb({
                 details: {"token": "is not valid"},
                 messages: ["token is not valid"]
@@ -198,6 +207,7 @@ module.exports = function(config) {
               transaction.hgetall(namespace + ":" + id)
             })
             transaction.exec(function(err, replies){
+              if (err) return cb([])
               var total = replies.length
               var count = 0
               if(total == 0){
@@ -229,6 +239,7 @@ module.exports = function(config) {
         }
 
         client.zrevrange(namespace + ":collection:created_at", start, stop, function(err, reply){
+          if (err) return cb([])
           var total = reply.length
           if(total === 0){
             cb([])
@@ -239,6 +250,7 @@ module.exports = function(config) {
               transaction.hgetall(namespace + ":" + id)
             })
             transaction.exec(function(err, replies){
+              if (err) return cb([])
               replies.forEach(function(obj){
                 that.out(obj, function(record){
                   count++
@@ -276,7 +288,7 @@ module.exports = function(config) {
           .hset(key, "role", role)
           .zadd(namespace + ":collection:role", role, id)
           .exec(function(err, replies){
-            if(!err) callback(true)
+            callback(!err)
           })
 
           // obj.account.role = obj.role
@@ -336,8 +348,8 @@ module.exports = function(config) {
         // setup write
         upgrader.constructor.prototype.write = function(identifier, obj, cb){
           obj.account.role = obj.role
-          upgradeRole(obj.account.id, obj.role, function(reply){
-            cb(obj.account)
+          upgradeRole(obj.account.id, obj.role, function(ok){
+            cb(ok ? obj.account : null)
           })
           // obj.account.role = obj.role
           // this.locals.client.hset("account:" + obj.account.id, "role", obj.account.role, function(err, reply){
@@ -360,7 +372,8 @@ module.exports = function(config) {
                       // only account. upgrade it as requested
                       a.role = role
                       self.locals.client.hset("account:" + a.id, "role", a.role, function(err, reply){
-                        if(!err) callback(null, a)
+                        if (err) return callback(refused("role", "could not be saved"))
+                        callback(null, a)
                       })
                     })
                   }else{
@@ -372,6 +385,8 @@ module.exports = function(config) {
               // not self upgrade attempt
               callback(errors)
             }
+          }else if(!record){
+            callback(refused("role", "could not be saved"))
           }else{
             // success
             callback(null, record)
@@ -423,6 +438,8 @@ module.exports = function(config) {
 
     var key = namespace + ":" + obj.id
     client.hgetall(key, function(err, old){
+      // without the old record its email and uuid indexes can't be moved
+      if(err) return cb(null)
       if(!old) old = {};
       client.multi()
       .del(namespace + ":email:" + old.email)
@@ -433,7 +450,7 @@ module.exports = function(config) {
       .zadd(namespace + ":collection:role", obj.role, obj.id)
       .zadd(namespace + ":collection:created_at", (new Date(obj.created_at).getTime()), obj.id)
       .exec(function(err, replies){
-        if(!err) cb(obj)
+        cb(err ? null : obj)
       })
     })
   }
@@ -452,7 +469,7 @@ module.exports = function(config) {
       .zrem(namespace + ":collection:role", record.id)
       .zrem(namespace + ":collection:created_at", record.id)
       .exec(function(err, replies){
-        if(!err) callback(null)
+        callback(err ? refused("account", "could not be removed") : null)
       })
     }
 
@@ -462,6 +479,19 @@ module.exports = function(config) {
       if (errors) return callback(errors)
       removeRecord()
     })
+  }
+
+  // Thug's write has no error channel: a write redis refused reaches set as
+  // no record, which is reported as errors rather than as a saved nothing
+  var thugSet = account.set
+  account.set = function(){
+    var args     = Array.prototype.slice.call(arguments)
+    var callback = args.pop()
+    args.push(function(errors, record){
+      if (!errors && !record) return callback(refused("account", "could not be saved"), null)
+      callback(errors, record)
+    })
+    thugSet.apply(account, args)
   }
 
   return account
