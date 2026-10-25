@@ -218,12 +218,12 @@ describe("org", function(){
     })
 
     it("keeps reserved names and anything reading as surge", function(done){
-      var bad = ["surge", "surge-team", "admin", "support", "www", "api"]
+      var bad = ["surge", "surge-team", "admin", "support", "www", "api", "list"]
       var left = bad.length
       bad.forEach(function(slug){
         rolodex.org.create({ slug: slug, name: "x", admin: other.id }, function(errors){
           should.exist(errors, slug)
-          errors.details.should.have.property("slug")
+          errors.details.should.have.property("slug", "is reserved")
           if (--left === 0){
             rolodex.org.create({ slug: "surgeon", name: "Surgeon", admin: person.id }, function(errors, org){
               should.not.exist(errors, "surgeon isn't surge")

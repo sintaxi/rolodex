@@ -36,25 +36,28 @@ var ROLES = ["admin", "member"]
 var HOLD = 60 * 60 * 24 * 30
 
 // names nobody's org gets: protocol words (read as a forced protocol in
-// the domain-or-path slot), surge's own, and the ones that would let an
-// org pass as part of the platform. Disputes over anything else are
-// handled by hand
+// the domain-or-path slot), surge's own, the ones that would let an org
+// pass as part of the platform, and the verbs that share the org's slot
+// in the cli (`surge orgs list` beside `surge orgs <org>`). Disputes over
+// anything else are handled by hand
 var RESERVED = [
   "http", "https", "www", "api", "admin", "administrator", "root",
   "support", "help", "docs", "status", "mail", "email", "smtp", "dns",
   "ns", "cdn", "static", "billing", "security", "abuse", "legal",
   "terms", "privacy", "pricing", "login", "signup", "account", "accounts",
   "org", "orgs", "team", "teams", "settings", "dashboard", "app", "blog",
-  "about", "staff", "official", "system"
+  "about", "staff", "official", "system", "list"
 ]
 
-// [a-z0-9-], 3-63 characters, no dash at either end, not reserved, and
-// nothing that reads as surge itself (surge, surge-anything)
+// [a-z0-9-], 3-63 characters, no dash at either end
 var validSlug = function(slug){
   return typeof slug === "string"
     && /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/.test(slug)
-    && RESERVED.indexOf(slug) === -1
-    && !/^surge(-|$)/.test(slug)
+}
+
+// a reserved name, or anything that reads as surge itself (surge, surge-*)
+var reservedSlug = function(slug){
+  return RESERVED.indexOf(slug) !== -1 || /^surge(-|$)/.test(slug)
 }
 
 var validName = function(name){
@@ -253,6 +256,7 @@ module.exports = function(config){
   org.create = function(props, callback){
     props = props || {}
     if (!validSlug(props.slug)) return callback(fail("slug", "must be 3-63 lowercase letters, digits or dashes"))
+    if (reservedSlug(props.slug)) return callback(fail("slug", "is reserved"))
     if (!validName(props.name)) return callback(fail("name", "must be 1-64 characters"))
     if (!props.admin) return callback(fail("admin", "must be present"))
     var members = {}
@@ -278,6 +282,7 @@ module.exports = function(config){
     changes = changes || {}
     if (changes.slug == null && changes.name == null) return callback(fail("org", "nothing to change"))
     if (changes.slug != null && !validSlug(changes.slug)) return callback(fail("slug", "must be 3-63 lowercase letters, digits or dashes"))
+    if (changes.slug != null && reservedSlug(changes.slug)) return callback(fail("slug", "is reserved"))
     if (changes.name != null && !validName(changes.name)) return callback(fail("name", "must be 1-64 characters"))
     client.eval(RENAME,
       [orgKey(id)],
