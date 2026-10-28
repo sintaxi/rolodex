@@ -477,6 +477,25 @@ module.exports = function(config){
     client.get("org:invite:" + codeKey(code), function(err, id){ callback(id || null) })
   }
 
+  // what a live code would do, without spending it: { org: id, role, by,
+  // created_at, expires_at }, or null
+  org.inviteInfo = function(code, callback){
+    var key = codeKey(code)
+    client.get("org:invite:" + key, function(err, id){
+      if (!id) return callback(null)
+      client.hgetall(invitesKey(id), function(err, raw){
+        var t = Date.now(), found = null
+        Object.keys(raw || {}).forEach(function(field){
+          var invite
+          try { invite = JSON.parse(raw[field]) } catch(e){ return }
+          if (invite.key === key && invite.expires_at > t) found = invite
+        })
+        if (!found) return callback(null)
+        callback({ org: id, role: found.role, by: found.by || null, created_at: found.created_at, expires_at: (new Date(found.expires_at)).toJSON() })
+      })
+    })
+  }
+
   // cancel a code. opts: { org: id } refuses a code for any other org.
   // Calls back with the org id
   org.scrap = function(code, opts, callback){

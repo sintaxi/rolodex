@@ -102,6 +102,25 @@ describe("invites", function(){
     })
   })
 
+  it("describes a live code without spending it", function(done){
+    mint(org.id, "admin", {}, function(invite){
+      rolodex.org.inviteInfo(invite.code.toUpperCase(), function(info){
+        info.should.have.properties({ org: org.id, role: "admin", by: admin.id })
+        should.exist(info.expires_at)
+        rolodex.org.inviteInfo("nope00zzzzz", function(none){
+          should.not.exist(none)
+          rolodex.org.scrap(invite.code, function(errors){
+            should.not.exist(errors, "still live after being described")
+            rolodex.org.inviteInfo(invite.code, function(gone){
+              should.not.exist(gone)
+              done()
+            })
+          })
+        })
+      })
+    })
+  })
+
   it("keeps several live at once, up to the limit", function(done){
     mint(org.id, "member", { most: 3 }, function(){
       mint(org.id, "admin", { most: 3 }, function(){
