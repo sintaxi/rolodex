@@ -24,18 +24,23 @@ var filters = require("../lib/filters")
  *   org:<id>:members      hash    account id -> "admin" | "member"
  *   account:<id>:orgs     set     the account's org ids
  *
- * An invite is sent to an email and joined by whichever signed-in account
- * holds its code: the email is where the invite goes, not who must accept
- * it (slushi plans/b2b.md, decided 2026-10-25). Codes are single-use and
- * expire; only their hash is stored.
- *   org:<id>:invites      hash    email -> json { key, role, by, created_at,
- *                                 expires_at }: one live invite per email.
- *                                 Invites don't count against the member
- *                                 cap; joining does, so a full org refuses
- *                                 the join and leaves the code good
+ * An invite is an anonymous code, joined by whichever signed-in account
+ * holds it (slushi plans/b2b.md, decided 2026-10-28: Surge never emails a
+ * code, whoever invites delivers it). Codes are single-use and expire;
+ * only their hash is stored, so an invite is listed by a hint instead.
+ *   org:<id>:invites      hash    key -> json { key, role, by, hint,
+ *                                 created_at, expires_at }: several live at
+ *                                 once, up to the caller's limit. Invites
+ *                                 don't count against the member cap;
+ *                                 joining does, so a full org refuses the
+ *                                 join and leaves the code good. (Invites
+ *                                 from before 2026-10-28 are keyed by the
+ *                                 email they went to; they join, list and
+ *                                 scrap the same way until they expire)
  *   org:invite:<key>      string  -> org id, expires with the invite. key is
  *                                 the sha256 of the code
  *   org:<id>:invited      hash    account id -> the email its invite went to
+ *                                 (email invites only)
  *
  * Every write is one lua script, so its rules and its keys move together:
  * slugs are unique, an org always has an admin, caps are checked in the
@@ -63,10 +68,6 @@ var newCode = function(){
 var codeKey = function(code){
   var plain = String(code || "").toLowerCase().replace(/[^a-z0-9]/g, "")
   return crypto.createHash("sha256").update(plain).digest("hex")
-}
-
-var validEmail = function(email){
-  return typeof email === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 254
 }
 
 // names nobody's org gets: protocol words (read as a forced protocol in
@@ -107,6 +108,8 @@ var CODES = {
   CAP:        ["members", "org has reached its member limit"],
   MEMBER:     ["email", "is already a member"],
   NO_INVITE:  ["invite", "is not valid"],
+  CODE_TAKEN: ["code", "is taken, try another"],
+  INVITES:    ["invites", "org has reached its limit of pending invites"],
   LAST_ADMIN: ["role", "org needs at least one admin"],
   NOT_MEMBER: ["account", "is not a member"],
   SOLE_ADMIN: ["account", "is the only admin of an org"]
@@ -228,21 +231,19 @@ var REMOVE_MEMBER = LIVE + ADMINS + [
   "return 'OK'"
 ].join("\n")
 
-// KEYS org, members, invites | ARGV id, email, role, by, now ms, now iso,
-// ttl seconds, key, cap. Inviting an email again replaces its invite (a
-// fresh code, a fresh expiry). A full org takes no invites: nobody could
-// join from them
+// KEYS org, members, invites | ARGV id, role, by, now ms, now iso, ttl
+// seconds, key, hint, cap, most live invites (0: no limit). A full org
+// takes no invites: nobody could join from them. A code already in use
+// anywhere is refused, so the caller draws another
 var INVITE = LIVE + PRUNE + [
   "if not live(KEYS[1]) then return redis.error_reply('NO_ORG') end",
-  "local id, email, now, ttl, cap = ARGV[1], ARGV[2], tonumber(ARGV[5]), tonumber(ARGV[7]), tonumber(ARGV[9])",
-  "local aid = redis.call('GET', 'account:email:' .. email)",
-  "if aid and redis.call('HEXISTS', KEYS[2], aid) == 1 then return redis.error_reply('MEMBER') end",
+  "local id, now, ttl, cap, most = ARGV[1], tonumber(ARGV[4]), tonumber(ARGV[6]), tonumber(ARGV[9]), tonumber(ARGV[10])",
   "if cap > 0 and redis.call('HLEN', KEYS[2]) >= cap then return redis.error_reply('CAP') end",
   "prune(KEYS[3], now)",
-  "local prev = redis.call('HGET', KEYS[3], email)",
-  "if prev then redis.call('DEL', 'org:invite:' .. cjson.decode(prev).key) end",
-  "redis.call('HSET', KEYS[3], email, cjson.encode({ key = ARGV[8], role = ARGV[3], by = ARGV[4], created_at = ARGV[6], expires_at = now + ttl * 1000 }))",
-  "redis.call('SET', 'org:invite:' .. ARGV[8], id, 'EX', ttl)",
+  "if most > 0 and redis.call('HLEN', KEYS[3]) >= most then return redis.error_reply('INVITES') end",
+  "if redis.call('EXISTS', 'org:invite:' .. ARGV[7]) == 1 then return redis.error_reply('CODE_TAKEN') end",
+  "redis.call('HSET', KEYS[3], ARGV[7], cjson.encode({ key = ARGV[7], role = ARGV[2], by = ARGV[3], hint = ARGV[8], created_at = ARGV[5], expires_at = now + ttl * 1000 }))",
+  "redis.call('SET', 'org:invite:' .. ARGV[7], id, 'EX', ttl)",
   "return 'OK'"
 ].join("\n")
 
@@ -288,9 +289,25 @@ var JOIN = LIVE + [
   "local current = redis.call('HGET', members, ARGV[2])",
   "if current then return { id, current, '1' } end",
   "redis.call('HSET', members, ARGV[2], invite.role)",
-  "redis.call('HSET', org .. ':invited', ARGV[2], email)",
+  "if string.find(email, '@', 1, true) then redis.call('HSET', org .. ':invited', ARGV[2], email) end",
   "redis.call('SADD', 'account:' .. ARGV[2] .. ':orgs', id)",
   "return { id, invite.role, '0' }"
+].join("\n")
+
+// KEYS org:invite:<key> | ARGV key, org id or "". Cancels the code: it
+// stops resolving and leaves the org's pending list. Refused for a code
+// that belongs to another org than the one named. Returns the org id
+var SCRAP = [
+  "local id = redis.call('GET', KEYS[1])",
+  "if not id then return redis.error_reply('NO_INVITE') end",
+  "if ARGV[2] ~= '' and ARGV[2] ~= id then return redis.error_reply('NO_INVITE') end",
+  "redis.call('DEL', KEYS[1])",
+  "local list = 'org:' .. id .. ':invites'",
+  "local all = redis.call('HGETALL', list)",
+  "for i = 1, #all, 2 do",
+  "  if cjson.decode(all[i + 1]).key == ARGV[1] then redis.call('HDEL', list, all[i]) end",
+  "end",
+  "return id"
 ].join("\n")
 
 // KEYS org, members, slugs | ARGV id, now. Leaves a tombstone: the record
@@ -437,39 +454,61 @@ module.exports = function(config){
   // invite an email: the code comes back once and is never stored. opts:
   // { by: inviting account id, cap: members per org }. Inviting the same
   // email again replaces the invite
-  org.invite = function(id, email, role, opts, callback){
+  // an anonymous invite: whoever holds the code joins. opts: { by: account
+  // id, code (the caller's shape; 16 letters and digits otherwise), hint
+  // (what the pending list shows instead of the code), cap: members per
+  // org, most: live invites per org }. A code that's already taken is
+  // refused (code: "is taken, try another"), so the caller draws again
+  org.invite = function(id, role, opts, callback){
     if (!callback){ callback = opts; opts = {} }
     opts = opts || {}
-    email = typeof email === "string" ? filters.normal(email) : null
-    if (!validEmail(email)) email = null
-    if (!email) return callback(fail("email", "must be an email address"))
     if (ROLES.indexOf(role) === -1) return callback(fail("role", "must be admin or member"))
-    var code = newCode(), t = Date.now()
+    var code = opts.code || newCode(), t = Date.now()
     client.eval(INVITE, [orgKey(id), membersKey(id), invitesKey(id)],
-      [id, email, role, opts.by || "", t, (new Date(t)).toJSON(), inviteTtl, codeKey(code), opts.cap || 0],
+      [id, role, opts.by || "", t, (new Date(t)).toJSON(), inviteTtl, codeKey(code), opts.hint || "", opts.cap || 0, opts.most || 0],
       function(err){
         if (err) return callback(fromRedis(err))
-        callback(null, { email: email, role: role, code: code, expires_at: (new Date(t + inviteTtl * 1000)).toJSON() })
+        callback(null, { code: code, hint: opts.hint || null, role: role, expires_at: (new Date(t + inviteTtl * 1000)).toJSON() })
       })
   }
 
-  // the org's live invites, oldest first
+  // the org a live code invites to (an id), or null
+  org.inviteOrg = function(code, callback){
+    client.get("org:invite:" + codeKey(code), function(err, id){ callback(id || null) })
+  }
+
+  // cancel a code. opts: { org: id } refuses a code for any other org.
+  // Calls back with the org id
+  org.scrap = function(code, opts, callback){
+    if (!callback){ callback = opts; opts = {} }
+    opts = opts || {}
+    var key = codeKey(code)
+    client.eval(SCRAP, ["org:invite:" + key], [key, opts.org || ""], function(err, id){
+      if (err) return callback(fromRedis(err))
+      callback(null, id)
+    })
+  }
+
+  // the org's live invites, oldest first: { hint, role, by, created_at,
+  // expires_at }, and email for an invite from before codes went anonymous
   org.invites = function(id, callback){
     client.hgetall(invitesKey(id), function(err, raw){
       if (err) return callback(fail("invites", "could not be read"))
       var t = Date.now(), out = []
-      Object.keys(raw || {}).forEach(function(email){
+      Object.keys(raw || {}).forEach(function(field){
         var invite
-        try { invite = JSON.parse(raw[email]) } catch(e){ return }
+        try { invite = JSON.parse(raw[field]) } catch(e){ return }
         if (invite.expires_at <= t) return
-        out.push({ email: email, role: invite.role, by: invite.by || null, created_at: invite.created_at, expires_at: (new Date(invite.expires_at)).toJSON() })
+        var entry = { hint: invite.hint || null, role: invite.role, by: invite.by || null, created_at: invite.created_at, expires_at: (new Date(invite.expires_at)).toJSON() }
+        if (field.indexOf("@") !== -1) entry.email = field
+        out.push(entry)
       })
       out.sort(function(a, b){ return a.created_at < b.created_at ? -1 : 1 })
       callback(null, out)
     })
   }
 
-  // change a pending invite's role
+  // change a pending email invite's role (invites from before 2026-10-28)
   org.inviteRole = function(id, email, role, callback){
     if (ROLES.indexOf(role) === -1) return callback(fail("role", "must be admin or member"))
     client.eval(SET_INVITE, [invitesKey(id)], [filters.normal(email), role], function(err){
@@ -477,7 +516,7 @@ module.exports = function(config){
     })
   }
 
-  // withdraw a pending invite: its code stops working at once
+  // withdraw a pending email invite: its code stops working at once
   org.uninvite = function(id, email, callback){
     client.eval(SET_INVITE, [invitesKey(id)], [filters.normal(email), ""], function(err){
       callback(err ? fromRedis(err) : null)
